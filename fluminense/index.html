@@ -124,10 +124,11 @@ td.pos{font-weight:700;width:2.2em;text-align:center}
 tr.inz4 td.pos{color:var(--z4)}
 .team{display:flex;align-items:center;gap:8px}
 .code{font-family:var(--f-detail);font-weight:600;font-size:.74rem;letter-spacing:.05em;background:var(--surface-2);border-radius:5px;padding:1px 6px;min-width:3.3em;text-align:center}
-.risk{display:flex;align-items:center;gap:8px;justify-content:flex-end;min-width:150px}
-.bar{flex:1;height:7px;border-radius:4px;background:var(--surface-2);overflow:hidden;min-width:60px;max-width:120px}
+.risk{display:flex;align-items:center;gap:8px;justify-content:flex-end;min-width:126px}
+.bar{flex:1;height:7px;border-radius:4px;background:var(--surface-2);overflow:hidden;min-width:48px;max-width:120px}
 .bar i{display:block;height:100%;background:var(--z4);border-radius:4px}
 .pct{font-weight:700;min-width:4.2em;text-align:right}
+.risk .tag{white-space:nowrap}
 .delta{font-family:var(--f-detail);font-size:.8rem;min-width:4.5em}
 .up{color:var(--z4)} .down{color:var(--good)}
 .tag{font-family:var(--f-detail);font-weight:600;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;border-radius:4px;padding:1px 6px}
@@ -213,10 +214,14 @@ details.adv[open] summary{margin-bottom:8px}
 .pbar i:nth-child(1){background:var(--moss)} .pbar i:nth-child(2){background:var(--yellow)} .pbar i:nth-child(3){background:var(--brown)}
 
 /* foco */
-.focus-head{display:flex;flex-wrap:wrap;gap:16px 30px;align-items:center}
+.focus-head{display:grid;grid-template-columns:auto minmax(200px,280px) minmax(0,1fr);gap:16px 30px;align-items:center}
+@media (max-width:900px){.focus-head{display:flex;flex-wrap:wrap}}
 .bignum{font-weight:800;font-size:3.6rem;line-height:.9;color:var(--z4);letter-spacing:-.03em}
 .bignum.lowrisk{color:var(--good)}
 .bignum.title{color:var(--moss)}
+.bigbox{max-width:280px}
+.biglbl{font-size:.84rem;font-family:var(--f-detail)}
+.bigsub{font-size:.76rem;font-family:var(--f-detail);margin-top:2px}
 .vagas{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;background:var(--surface-2);border-radius:12px;padding:10px 14px;font-family:var(--f-detail);font-size:.84rem}
 .vagas .vg-title{font-weight:600;color:var(--brown);text-transform:uppercase;letter-spacing:.1em;font-size:.72rem}
 .vagas label{display:inline-flex;align-items:center;gap:6px;color:var(--muted)}
@@ -389,7 +394,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
           <button type="button" data-m="sula" aria-pressed="false">Sul-Americana</button>
         </div>
       </div>
-      <div><div class="bignum num" id="bigPct">–</div><div class="muted" style="font-size:.84rem;font-family:var(--f-detail)" id="bigLbl">chance de rebaixamento</div></div>
+      <div class="bigbox"><div class="bignum num" id="bigPct">–</div><div class="muted biglbl" id="bigLbl">chance de rebaixamento</div><div class="muted bigsub" id="bigSub" hidden></div></div>
       <div class="facts" id="facts"></div>
     </div>
     <div class="vagas" id="vagas" role="group" aria-labelledby="vgTitle">
@@ -1468,10 +1473,10 @@ function renderTable(){
       dCell = '<td class="delta '+(better?'down':worse?'up':'muted')+'">'+ppTxt(d)+'</td>'; }
     rows.push('<tr data-i="'+s.i+'" class="'+zoneClass(k)+(k>=16?' inz4':'')+(s.i===focus?' focus':'')+(s.i===myTeam?' mine':'')+'">'+
       '<td class="pos">'+(k+1)+'</td>'+
-      '<td class="l"><div class="team"><span class="code">'+t.c+'</span><span class="tname">'+t.n+'</span>'+tag+mine+'</div></td>'+
+      '<td class="l"><div class="team"><span class="code">'+t.c+'</span><span class="tname">'+t.n+'</span>'+mine+'</div></td>'+
       '<td><b>'+s.P+'</b></td><td class="hide-sm">'+s.J+'</td><td class="hide-sm">'+s.V+'</td><td class="hide-sm">'+(s.SG>0?'+':'')+s.SG+'</td>'+
       '<td class="hide-sm muted">'+fmt1.format(res.ptsMean[s.i])+'</td>'+
-      '<td><div class="risk"><span class="bar"><i style="width:'+(Math.min(p,1)*100).toFixed(1)+'%;background:var('+D.color+')"></i></span><span class="pct">'+pctCell+'</span></div></td>'+
+      '<td><div class="risk">'+(tag ? tag : '<span class="bar"><i style="width:'+(Math.min(p,1)*100).toFixed(1)+'%;background:var('+D.color+')"></i></span><span class="pct">'+pctCell+'</span>')+'</div></td>'+
       dCell+'</tr>');
   });
   $('#tbl tbody').innerHTML = rows.join('');
@@ -1693,7 +1698,8 @@ function renderFocus(){
   if (!res) return;
   const t = focus, D = MET[metric], p = D.prob(res)[t], se = D.se(res)[t];
   const st = buildState(choice,null,scH,scA);
-  const big = $('#bigPct'), lbl = $('#bigLbl');
+  const big = $('#bigPct'), lbl = $('#bigLbl'), sub = $('#bigSub');
+  sub.hidden = true; sub.textContent = '';
   big.style.color = '';
   big.classList.remove('lowrisk');
   const tail = ' de '+TEAMS[t].n+' (±'+fmt1.format(1.96*se*100)+' pp)';
@@ -1707,11 +1713,16 @@ function renderFocus(){
     const k = metric==='tit' ? 1 : metric==='lib' ? VAGAS.d+VAGAS.p : 0;
     const ms = k ? E.mathTop(st.shown, st.free, k)[t] : null;
     big.textContent = ms==='garantido' ? '100%' : ms==='fora' ? '0%' : pctTxt(p);
-    const names = {tit:['campeão matematicamente','sem chance matemática de título','chance de título'], lib:['vaga na Libertadores garantida matematicamente','sem chance matemática de Libertadores','chance de '+verbOf('lib').replace('ir à ','')], sula:['','','chance de '+verbOf('sula').replace('ir à ','')]}[metric];
+    const names = {tit:['campeão matematicamente','sem chance matemática de título','chance de título'], lib:['vaga na Libertadores garantida matematicamente','sem chance matemática de Libertadores','chance de Libertadores'], sula:['','','chance de Sul-Americana']}[metric];
     lbl.textContent = ms==='garantido' ? names[0] : ms==='fora' ? names[1] : names[2]+tail;
-    if (metric==='lib' && VAGAS.p>0 && ms!=='fora'){
-      const pd = res.m.libd.prob[t];
-      lbl.textContent += ' · fase de grupos: '+pctTxt(pd)+' · fase preliminar: '+pctTxt(Math.max(p-pd,0));
+    if (metric==='lib' || metric==='sula'){
+      const [a,b] = zoneRange(metric);
+      let txt = b<a ? 'sem vagas' : posTxt(a,b);
+      if (metric==='lib' && VAGAS.p>0 && ms!=='fora'){
+        const pd = res.m.libd.prob[t];
+        txt += ' · grupos: '+pctTxt(pd)+' · preliminar: '+pctTxt(Math.max(p-pd,0));
+      }
+      sub.textContent = txt; sub.hidden = false;
     }
   }
   const rem = st.free.filter(g=>g.h===t||g.a===t).length, ps = ptsStats(t);
