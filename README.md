@@ -2,7 +2,7 @@
 
 Simulador do Brasileirão Série A 2026. Joga o restante do campeonato milhares de vezes e estima, para cada clube, a chance de título, de vaga na Libertadores, de vaga na Sul-Americana e de rebaixamento.
 
-**Acesse:** https://henriqueaf16.github.io/bola-de-cristal-brasileirao/
+**Acesse:** https://boladecristal.app.br/
 
 ## O que dá para fazer
 
