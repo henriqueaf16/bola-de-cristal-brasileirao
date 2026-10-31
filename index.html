@@ -1,9 +1,22 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Simulador do Brasileirão 2026</title>
+<!doctype html><html lang="pt-BR"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<title>Bola de Cristal · Simulador do Brasileirão 2026</title>
+<meta name="description" content="Simulador do Brasileirão Série A 2026: chances de título, Libertadores, Sul-Americana e rebaixamento de cada clube, calculadas com modelo de Poisson e simulação de Monte Carlo. Lance palpites jogo a jogo e veja a tabela reagir.">
+<link rel="canonical" href="https://boladecristal.app.br/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="Bola de Cristal">
+<meta property="og:title" content="Bola de Cristal · Simulador do Brasileirão 2026">
+<meta property="og:description" content="Chances de título, Libertadores, Sul-Americana e rebaixamento de cada clube, atualizadas a cada rodada. Lance seus palpites e veja a tabela reagir.">
+<meta property="og:url" content="https://boladecristal.app.br/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#4e6035">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M18 50h28l4 8H14z' fill='%237a5636'/%3E%3Ccircle cx='32' cy='29' r='22' fill='%234e6035'/%3E%3Ccircle cx='24' cy='21' r='6' fill='%23f4e5bb'/%3E%3Ccircle cx='40' cy='36' r='3' fill='%23c99419'/%3E%3C/svg%3E">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Bola de Cristal","alternateName":"Simulador do Brasileirão","url":"https://boladecristal.app.br/","inLanguage":"pt-BR"}</script>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+</head><body>
 <style>
 /* Layout: duas vistas (Simulador | Metodologia). No simulador, a tabela de risco à esquerda e a súmula de palpites à direita; abaixo, o time em foco. Superfícies chapadas, sem linhas de grade. */
 :root{
@@ -255,8 +268,8 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
 <div class="wrap">
   <header class="top">
     <div class="meta">
-      <span class="eyebrow">Série A 2026 · título, Libertadores, Sul-Americana e rebaixamento</span>
-      <h1>Simulador do Brasileirão</h1>
+      <span class="eyebrow">Simulador do Brasileirão Série A 2026 · título, Libertadores, Sul-Americana e rebaixamento</span>
+      <h1>Bola de Cristal</h1>
       <div class="statusline" id="status"></div>
     </div>
     <div class="views" role="tablist" aria-label="Seções">
@@ -387,7 +400,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
   <div id="viewTut" hidden>
     <article class="article tut">
       <span class="eyebrow">Tutorial · 5 minutos</span>
-      <h1 style="font-size:clamp(1.7rem,3.6vw,2.4rem)">Como usar o Simulador do Brasileirão</h1>
+      <h1 style="font-size:clamp(1.7rem,3.6vw,2.4rem)">Como usar a Bola de Cristal</h1>
       <p class="lede">O simulador joga o resto da Série A 2026 milhares de vezes e mostra, para cada clube, a chance de título, de vaga na Libertadores, de vaga na Sul-Americana e de rebaixamento. Você pode lançar palpites e ver na hora como as chances mudam.</p>
 
       <section class="step"><span class="stepn">1</span><div>
@@ -462,7 +475,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
       </nav>
       <article class="article">
         <span class="eyebrow">Metodologia · versão 3 · 26/10/2026</span>
-        <h1 style="font-size:clamp(1.7rem,3.6vw,2.4rem)">Como o Simulador do Brasileirão calcula as chances</h1>
+        <h1 style="font-size:clamp(1.7rem,3.6vw,2.4rem)">Como a Bola de Cristal calcula as chances</h1>
 
         <section id="m-resumo">
           <p class="lede">O simulador estima a força de ataque e de defesa de cada clube combinando a temporada passada com os placares de 2026, monta uma distribuição de placares para cada jogo que falta e sorteia o restante do campeonato dezenas ou centenas de milhares de vezes, levando em conta que a própria força dos times é incerta. A chance de cada desfecho é a fração dos campeonatos simulados em que ele acontece: título (1º lugar), Libertadores (1º ao 5º), Sul-Americana (6º ao 11º) e rebaixamento (17º ao 20º).</p>
