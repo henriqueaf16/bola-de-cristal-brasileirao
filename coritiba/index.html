@@ -28,7 +28,7 @@
   --moss:#4e6035; --moss-soft:#dfe3cd; --on-moss:#faf7f1;
   --brown:#7a5636; --brown-soft:#eadccb;
   --yellow:#c99419; --yellow-soft:#f4e5bb;
-  --c-tit:#a87b10; --c-lib:#4e6035; --c-sula:#4f6d8a; /* cores das zonas (tabela, legenda, gráficos) */
+  --c-tit:#a87b10; --c-lib:#4e6035; --c-pre:#97a978; --c-sula:#4f6d8a; /* cores das zonas (tabela, legenda, gráficos) */
   --z4:#a3432b; --z4-soft:#f1dcd2; --good:#4e6035;
   --f-main:"Montserrat",system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-detail:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -39,14 +39,14 @@
   --moss:#a6ba7f; --moss-soft:#2f3625; --on-moss:#1a1915;
   --brown:#cfa57c; --brown-soft:#3a2f24;
   --yellow:#e4b84d; --yellow-soft:#3d3420;
-  --c-tit:#e4b84d; --c-lib:#a6ba7f; --c-sula:#9db8d3;
+  --c-tit:#e4b84d; --c-lib:#a6ba7f; --c-pre:#66764a; --c-sula:#9db8d3;
   --z4:#e5866e; --z4-soft:#40271f; --good:#a6ba7f; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#1a1915; --surface:#23211b; --surface-2:#2d2a22; --ink:#ede6d6; --muted:#a69e8b; --line:#3b372c;
   --moss:#a6ba7f; --moss-soft:#2f3625; --on-moss:#1a1915;
   --brown:#cfa57c; --brown-soft:#3a2f24;
   --yellow:#e4b84d; --yellow-soft:#3d3420;
-  --c-tit:#e4b84d; --c-lib:#a6ba7f; --c-sula:#9db8d3;
+  --c-tit:#e4b84d; --c-lib:#a6ba7f; --c-pre:#66764a; --c-sula:#9db8d3;
   --z4:#e5866e; --z4-soft:#40271f; --good:#a6ba7f; color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -115,6 +115,7 @@ td{padding:6px 7px;text-align:right;font-variant-numeric:tabular-nums;white-spac
 #tbl td.pos{border-left:4px solid transparent}
 #tbl tr.zt td.pos{border-left-color:var(--c-tit)}
 #tbl tr.zl td.pos{border-left-color:var(--c-lib)}
+#tbl tr.zp td.pos{border-left-color:var(--c-pre)}
 #tbl tr.zs td.pos{border-left-color:var(--c-sula)}
 #tbl tr.zz td.pos{border-left-color:var(--z4)}
 #tbl tbody tr.focus td{box-shadow:inset 0 2px 0 var(--ink),inset 0 -2px 0 var(--ink)}
@@ -409,7 +410,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
           <button type="button" data-m="z4" aria-pressed="true">Queda</button>
         </div>
       </div>
-      <div class="legend"><span class="zleg"><i style="background:var(--c-tit)"></i>Título</span><span class="zleg"><i style="background:var(--c-lib)"></i>Libertadores</span><span class="zleg"><i style="background:var(--c-sula)"></i>Sul-Americana</span><span class="zleg"><i style="background:var(--z4)"></i>Rebaixamento</span><span class="muted">Faixas pela posição atual · clique num time para analisá-lo</span></div>
+      <div class="legend"><span class="zleg"><i style="background:var(--c-tit)"></i>Título</span><span class="zleg"><i style="background:var(--c-lib)"></i>Libertadores (grupos)</span><span class="zleg" id="legPre"><i style="background:var(--c-pre)"></i>Pré-Libertadores</span><span class="zleg"><i style="background:var(--c-sula)"></i>Sul-Americana</span><span class="zleg"><i style="background:var(--z4)"></i>Rebaixamento</span><span class="muted">Faixas pela posição atual · clique num time para analisá-lo</span></div>
       <div class="tablewrap"><table id="tbl">
         <thead><tr><th class="l">#</th><th class="l">Time</th><th>P</th><th class="hide-sm">J</th><th class="hide-sm">V</th><th class="hide-sm" title="Saldo de gols dos jogos reais">SG</th><th class="hide-sm" title="Pontuação final média nas simulações">Proj.</th><th id="thMet">Queda</th><th id="thDelta" title="Diferença para o cenário sem palpites">Δ</th></tr></thead>
         <tbody></tbody>
@@ -1566,8 +1567,10 @@ function standings(){
 }
 function statusNow(){ const st = buildState(choice,null,scH,scA); return E.mathStatus(st.shown, st.free); }
 /* Faixa de zona pela posição atual: 1º título, Libertadores, Sul-Americana e Z4, com as vagas configuradas. */
-function zoneClass(k){ const [,lb] = zoneRange('lib'), [sa,sb] = zoneRange('sula'); return k===0 ? 'zt' : k<=lb ? 'zl' : (k>=sa && k<=sb) ? 'zs' : k>=16 ? 'zz' : ''; }
+// faixas: título (1º), Libertadores fase de grupos, pré-Libertadores (fase preliminar), Sul-Americana, rebaixamento
+function zoneClass(k){ const [,lb] = zoneRange('lib'), [,gb] = zoneRange('libd'), [sa,sb] = zoneRange('sula'); return k===0 ? 'zt' : k<=gb ? 'zl' : k<=lb ? 'zp' : (k>=sa && k<=sb) ? 'zs' : k>=16 ? 'zz' : ''; }
 function renderTable(){
+  $('#legPre').hidden = !VAGAS.p;
   const D = MET[metric], P = D.prob(res), B = baseRes ? D.prob(baseRes) : null;
   const st = buildState(choice,null,scH,scA);
   const msZ = metric==='z4' ? E.mathStatus(st.shown, st.free) : null;
