@@ -305,13 +305,38 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
   .bignum{font-size:3rem}
   .progress{width:90px}
 }
-</style>
 
+/* Revisão de usabilidade: ações claras, comparação próxima e identidade editorial preservada. */
+:root{--lib:#245fa6;--sula:#75529a;--yellow:#93680b}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--lib:#8cbaff;--sula:#d1a8ef;--yellow:#e4b84d}}
+:root[data-theme="dark"]{--lib:#8cbaff;--sula:#d1a8ef;--yellow:#e4b84d}
+.intro{margin:2px 0 0;color:var(--muted);font-family:var(--f-detail);font-size:1rem;max-width:54ch}
+.quick-pick{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;margin-top:4px}
+.quick-pick button{min-height:44px;border:1px solid var(--line);border-radius:7px;background:var(--surface);font:600 .75rem var(--f-detail);padding:5px 3px}
+.quick-pick button[aria-pressed="true"]{background:var(--moss);color:var(--on-moss);border-color:var(--moss)}
+.score .sc{min-width:44px;min-height:44px;width:100%}
+.score{grid-template-columns:minmax(0,1fr) 44px 12px 44px minmax(0,1fr)}
+.score-hint{font-family:var(--f-detail);font-size:.75rem;color:var(--muted)}
+.score-hint:empty{display:none}
+.undo-pick{min-height:32px;justify-self:center;font-family:var(--f-detail);font-size:.8rem}
+.played-list{grid-column:1/-1;font-family:var(--f-detail)}
+.played-list summary{cursor:pointer;min-height:44px;padding:10px 0;color:var(--muted)}
+.scenario-summary{position:sticky;top:8px;z-index:10;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px;box-shadow:0 4px 14px #0000000c}
+.scenario-summary>div:first-child{display:flex;flex-direction:column;font-family:var(--f-detail)}
+.scenario-summary span{font-size:.85rem}.scenario-summary small{display:block;color:var(--muted);font-family:var(--f-detail);font-size:.72rem}
+.scenario-values{display:flex;align-items:center;gap:16px}.scenario-values b{font-size:1.35rem}.scenario-values strong{font-size:.9rem}
+input,select,button,a{scroll-margin-block:140px}
+.team-focus{border:0;background:none;font:inherit;text-align:left;padding:2px 0;color:inherit;min-height:32px}
+#tbl tr.zl td.pos{border-left-color:var(--lib)}#tbl tr.zs td.pos{border-left-color:var(--sula)}
+@media(max-width:560px){.scenario-summary{padding:10px 12px;flex-wrap:wrap;gap:4px}.scenario-values{width:100%;justify-content:space-between;gap:8px}.scenario-values b{font-size:1.15rem}.grid>section[aria-labelledby="hJogos"]{order:-1}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
 <div class="wrap">
   <header class="top">
     <div class="meta">
       <span class="eyebrow">Simulador do Brasileirão 2026 · Bahia</span>
       <h1>Bola de Cristal</h1>
+      <p class="intro">Dê seus palpites e descubra como mudam as chances do seu time.</p>
       <div class="statusline" id="status"></div>
     </div>
     <div class="views" role="tablist" aria-label="Seções">
@@ -342,6 +367,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
     </div>
   </div>
   <div class="toast" id="migrMsg" aria-live="polite" hidden></div>
+  <section class="scenario-summary" id="scenarioSummary" aria-label="Efeito dos seus palpites" hidden></section>
 
   <div class="grid">
     <section class="panel" aria-labelledby="hTabela">
@@ -354,7 +380,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
           <button type="button" data-m="z4" aria-pressed="true">Queda</button>
         </div>
       </div>
-      <div class="legend"><span class="zleg"><i style="background:var(--yellow)"></i>Título</span><span class="zleg"><i style="background:var(--moss)"></i>Libertadores</span><span class="zleg"><i style="background:var(--brown)"></i>Sul-Americana</span><span class="zleg"><i style="background:var(--z4)"></i>Rebaixamento</span><span class="muted">Faixas pela posição atual · clique num time para analisá-lo</span></div>
+      <div class="legend"><span class="zleg"><i style="background:var(--yellow)"></i>Título</span><span class="zleg"><i style="background:var(--lib)"></i>Libertadores</span><span class="zleg"><i style="background:var(--sula)"></i>Sul-Americana</span><span class="zleg"><i style="background:var(--z4)"></i>Rebaixamento</span><span class="muted">Faixas pela posição atual · clique num time para analisá-lo</span></div>
       <div class="tablewrap"><table id="tbl">
         <thead><tr><th class="l">#</th><th class="l">Time</th><th>P</th><th class="hide-sm">J</th><th class="hide-sm">V</th><th class="hide-sm" title="Saldo de gols dos jogos reais">SG</th><th class="hide-sm" title="Pontuação final média nas simulações">Proj.</th><th id="thMet">Queda</th><th id="thDelta" title="Diferença para o cenário sem palpites">Δ</th></tr></thead>
         <tbody></tbody>
@@ -377,7 +403,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
       </div>
       <div class="tabs" role="tablist" id="tabs"></div>
       <div class="games" id="games"></div>
-      <p class="note">Veja os jogos por rodada ou todos os jogos que faltam para um time. Nas rodadas já disputadas, as abas mostram os placares reais. Digite o placar nos dois campos de um jogo para lançar o palpite; apague os dois para desfazer. Jogos com palpite ficam destacados. Abaixo de cada jogo, as chances que o modelo dá para vitória do mandante, empate e vitória do visitante, e os gols esperados.</p>
+      <p class="note">Escolha vitória ou empate, ou digite um placar nos dois campos. Use “Desfazer” para remover o palpite. Jogos encerrados ficam disponíveis para consulta. As chances abaixo de cada jogo são as do modelo, sem tratar seus palpites como evidência.</p>
     </section>
   </div>
 
@@ -394,7 +420,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
           <button type="button" data-m="sula" aria-pressed="false">Sul-Americana</button>
         </div>
       </div>
-      <div class="bigbox"><div class="bignum num" id="bigPct">–</div><div class="muted biglbl" id="bigLbl">chance de rebaixamento</div><div class="muted bigsub" id="bigSub" hidden></div></div>
+      <div class="bigbox"><div class="bignum num" id="bigPct">–</div><div class="muted biglbl" id="bigLbl">chance de rebaixamento</div><div class="muted bigsub" id="bigSub" hidden></div><p class="note">O ± mede somente o erro numérico da simulação, não toda a incerteza da previsão.</p></div>
       <div class="facts" id="facts"></div>
     </div>
     <div class="vagas" id="vagas" role="group" aria-labelledby="vgTitle">
@@ -435,7 +461,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
       <label for="codeOut" style="font-weight:600">Código do cenário atual</label>
       <div class="codebox"><input id="codeOut" readonly><button class="btn primary" id="btnCopy" type="button">Copiar código</button></div>
       <label for="codeIn" style="font-weight:600;margin-top:6px">Carregar um código recebido</label>
-      <div class="codebox"><input id="codeIn" placeholder="Cole aqui um código Z4C-… (códigos antigos também funcionam)"><button class="btn" id="btnLoad" type="button">Carregar</button></div>
+      <div class="codebox"><input id="codeIn" placeholder="Cole aqui um código Z4… (códigos antigos também funcionam)"><button class="btn" id="btnLoad" type="button">Carregar</button></div>
       <div class="toast" id="codeMsg" aria-live="polite"></div>
     </div>
     <div id="dbBox" hidden style="display:flex;flex-direction:column;gap:8px">
@@ -445,7 +471,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
       <div class="toast" id="saveMsg" aria-live="polite"></div>
     </div>
   </section>
-  <footer>Modelo de Poisson com ataque e defesa, prior da temporada 2025, peso no tempo, correção de Dixon-Coles e incerteza dos parâmetros (versão 3, 26/10/2026). Placares de 2026: dados abertos do ValorFinal, origem football-data.org, atualizados em <span class="asof"></span>. Detalhes, fórmulas e referências na aba Metodologia.
+  <footer>Modelo de Poisson com ataque e defesa, prior da temporada 2025, peso no tempo, correção de Dixon-Coles e incerteza dos parâmetros (versão 3, revisão do motor em 01/11/2026). Placares de 2026: dados abertos do ValorFinal, origem football-data.org, atualizados em <span class="asof"></span>. Detalhes, fórmulas e referências na aba Metodologia.
     <nav class="teamlinks" aria-label="Página de cada time"><span>Página de cada time:</span> <a href="https://boladecristal.app.br/athletico-pr/">Athletico-PR</a> <a href="https://boladecristal.app.br/atletico-mg/">Atlético-MG</a> <a href="https://boladecristal.app.br/bahia/">Bahia</a> <a href="https://boladecristal.app.br/botafogo/">Botafogo</a> <a href="https://boladecristal.app.br/bragantino/">Bragantino</a> <a href="https://boladecristal.app.br/chapecoense/">Chapecoense</a> <a href="https://boladecristal.app.br/corinthians/">Corinthians</a> <a href="https://boladecristal.app.br/coritiba/">Coritiba</a> <a href="https://boladecristal.app.br/cruzeiro/">Cruzeiro</a> <a href="https://boladecristal.app.br/flamengo/">Flamengo</a> <a href="https://boladecristal.app.br/fluminense/">Fluminense</a> <a href="https://boladecristal.app.br/gremio/">Grêmio</a> <a href="https://boladecristal.app.br/internacional/">Internacional</a> <a href="https://boladecristal.app.br/mirassol/">Mirassol</a> <a href="https://boladecristal.app.br/palmeiras/">Palmeiras</a> <a href="https://boladecristal.app.br/remo/">Remo</a> <a href="https://boladecristal.app.br/santos/">Santos</a> <a href="https://boladecristal.app.br/sao-paulo/">São Paulo</a> <a href="https://boladecristal.app.br/vasco/">Vasco</a> <a href="https://boladecristal.app.br/vitoria/">Vitória</a></nav>
   </footer>
   </div>
@@ -463,7 +489,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
 
       <section class="step"><span class="stepn">2</span><div>
         <h2>Lance seus palpites</h2>
-        <p>No quadro <b>Lance os resultados</b>, escolha a rodada nas abas e digite o placar nos dois campos de cada jogo, como numa tabela de rodada. As abas vão da 1ª à 38ª rodada: nas rodadas encerradas aparecem os placares reais, só para consulta. Para ver de uma vez todos os jogos que faltam para um clube, troque para <b>Jogos de um time</b> e escolha o time; a lista mostra a rodada, a data e se o jogo é em casa ou fora. Para desfazer, apague os dois campos. O placar conta nos pontos, nas vitórias e no saldo de gols.</p>
+        <p>No quadro <b>Lance os resultados</b>, escolha a rodada nas abas e escolha vitória ou empate nos botões rápidos, ou digite o placar nos dois campos de cada jogo. As abas vão da 1ª à 38ª rodada: nas rodadas encerradas aparecem os placares reais, só para consulta. Para ver de uma vez todos os jogos que faltam para um clube, troque para <b>Jogos de um time</b> e escolha o time; a lista mostra a rodada, a data e se o jogo é em casa ou fora. Para desfazer, use o botão do jogo ou apague os dois campos. O placar exato conta nos pontos, nas vitórias e no saldo de gols; um resultado sem placar sorteia gols compatíveis com a hipótese.</p>
         <p>Embaixo de cada jogo aparecem as chances que o modelo dá a cada resultado e os gols esperados, para você comparar com o seu palpite.</p>
         <p class="note">Depois de cada palpite, a tabela recalcula sozinha. A coluna <b>Δ</b> mostra quanto a chance de cada time mudou em relação ao cenário sem palpites, e o painel do time em foco mostra a pontuação final provável com e sem os seus palpites.</p>
       </div></section>
@@ -472,7 +498,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
         <h2>Analise um time</h2>
         <p>Clique num time da tabela ou escolha no seletor do painel <b>Time em foco</b>. Depois escolha o que quer ver: <b>Rebaixamento</b>, <b>Título</b>, <b>Libertadores</b> ou <b>Sul-Americana</b>. Todo o painel muda junto:</p>
         <ul>
-          <li><b>Número grande</b>: a chance do time, com a margem de erro da simulação.</li>
+          <li><b>Número grande</b>: a chance do time, com o erro numérico da simulação, que não cobre toda a incerteza da previsão.</li>
           <li><b>Evolução rodada a rodada</b>: como a chance mudou ao longo do campeonato. A linha tracejada é o seu cenário, com um ponto por rodada que você preencher inteira.</li>
           <li><b>Jogos decisivos</b>: a chance do time em cada resultado de cada jogo da rodada. As colunas não somam 100%; cada uma responde "e se esse resultado acontecer?". O <b>impacto</b> mostra os jogos que mais mexem com o time.</li>
           <li><b>Por pontuação</b>: a chance de quem termina com cada número de pontos e os pontos de corte, por exemplo quantos pontos deixam o risco de queda abaixo de 1%.</li>
@@ -491,7 +517,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
 
       <section class="step"><span class="stepn">6</span><div>
         <h2>Salve e compartilhe</h2>
-        <p>No fim da página, <b>Copiar código</b> gera um código que começa com <code>Z4C-</code> e guarda seus palpites, placares e vagas. Quem colar o código em <b>Carregar</b> vê o mesmo cenário. Você também pode dar um nome ao cenário e salvá-lo na própria página. Seus palpites ficam guardados no navegador mesmo se você fechar a aba.</p>
+        <p>No fim da página, <b>Copiar código</b> gera um código que começa com <code>Z4</code> e guarda seus palpites, placares e vagas. Quem colar o código em <b>Carregar</b> vê o mesmo cenário. Quando disponível, o painel de cenários salvos permite dar nomes a eles. Seus palpites ficam guardados no navegador mesmo se você fechar a aba.</p>
       </div></section>
 
       <section>
@@ -564,7 +590,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
             <div>ℓ(θ) = Σ<sub>jogos</sub> <em>w<sub>j</sub></em> [ <em>x</em> log <em>λ</em> − <em>λ</em> + <em>y</em> log <em>ν</em> − <em>ν</em> ] − Σ<sub>i</sub> [ (<em>a<sub>i</sub></em> − <em>ā<sub>i</sub></em>)² + (<em>d<sub>i</sub></em> − <em>d̄<sub>i</sub></em>)² ] / (2<em>σ</em>²)</div>
             <div class="c" style="margin-left:0"><em>w<sub>j</sub></em>: peso do jogo no tempo (seção 4); <em>ā</em>, <em>d̄</em>: médias a priori (seção 3); σ = 0,20. Maximização por Newton-Raphson completo, com busca em linha, até a maior mudança ficar abaixo de 10<sup>−10</sup>.</div>
           </div>
-          <p>A penalidade equivale a uma distribuição a priori normal para ataque e defesa, a mesma ideia da regressão ridge<sup class="ref"><a href="#r5">[5]</a></sup>. Com poucos jogos, a estimativa fica perto do prior; com muitos, os placares de 2026 dominam.</p>
+          <p>O ajuste usa a verossimilhança de Poisson; a correção de Dixon-Coles é aplicada depois, com ρ fixo calibrado no backtest. Não se trata de estimação conjunta da verossimilhança corrigida. A penalidade equivale a uma distribuição a priori normal para ataque e defesa, a mesma ideia da regressão ridge<sup class="ref"><a href="#r5">[5]</a></sup>. Com poucos jogos, a estimativa fica perto do prior; com muitos, os placares de 2026 dominam.</p>
           <p>Força atual estimada, com <span id="mFitInfo"></span>. Valores em multiplicador: ataque 1,20 significa marcar 20% mais gols que um time médio contra o mesmo adversário; defesa 0,80 significa sofrer 20% menos. O ± é um desvio-padrão da estimativa.</p>
           <div class="tablewrap"><table class="mtable" id="mRatings">
             <thead><tr><th class="l">Time</th><th title="Ataque e defesa a priori, vindos de 2025">Prior (A / D)</th><th>Ataque</th><th>Defesa</th><th title="Gols marcados por jogo contra adversário médio, campo neutro">Gols pró</th><th title="Gols sofridos por jogo contra adversário médio, campo neutro">Gols contra</th><th title="Saldo esperado por jogo contra adversário médio, campo neutro">Saldo esp.</th></tr></thead>
@@ -579,7 +605,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
             <div><em>ā<sub>i</sub></em> = <em>k</em> · log( GP<sub>i</sub>/J ÷ <em>m</em> ),  <em>d̄<sub>i</sub></em> = <em>k</em> · log( <em>m</em> ÷ GC<sub>i</sub>/J )<span class="c"><em>m</em> = média de gols por time por jogo em 2025</span></div>
             <div>Promovidos: <em>ā</em> e <em>d̄</em> = <em>k</em> × média dos quatro rebaixados de 2025 (Ceará, Fortaleza, Juventude e Sport)<span class="c">Athletico-PR, Coritiba, Remo e Chapecoense</span></div>
           </div>
-          <p><em>k</em> = 0,6 é a regressão à média entre temporadas: mudanças de elenco e de técnico fazem só parte da força passada se repetir. Como a tabela é de turno e returno completo, a razão entre gols e jogos já desconta a dificuldade do calendário. O FiveThirtyEight resolve o mesmo problema com o valor de mercado dos elencos<sup class="ref"><a href="#r10">[10]</a></sup>; aqui o dado disponível são os gols.</p>
+          <p><em>k</em> = 0,6 é a regressão à média entre temporadas: mudanças de elenco e de técnico fazem só parte da força passada se repetir. O turno e returno reduz o desequilíbrio do calendário; usar gols agregados, porém, não equivale a estimar forças ajustadas por adversário. O FiveThirtyEight resolve o mesmo problema com o valor de mercado dos elencos<sup class="ref"><a href="#r10">[10]</a></sup>; aqui o dado disponível são os gols.</p>
           <p><em>k</em> e σ foram escolhidos em grade (k de 0 a 1, σ de 0,15 a 0,35) pelo menor log loss fora da amostra. A região boa é k entre 0,5 e 0,7 com σ = 0,20. Com k = 1 (prior sem regressão) o resultado piora, sinal de que a temporada passada exagera a diferença entre os times.</p>
         </section>
 
@@ -606,7 +632,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
           <p>Ataque e defesa são estimativas, não valores conhecidos. Ignorar isso deixa as chances extremas confiantes demais: no backtest, times aos quais a versão 2 dava menos de 2% de risco caíram em 2,3% dos casos. A incerteza é propagada assim:</p>
           <ol>
             <li>No ajuste, calcula-se a matriz de informação <em>J</em> (menos a hessiana de ℓ). Pela aproximação de Laplace<sup class="ref"><a href="#r16">[16]</a></sup>, θ ~ Normal(θ̂, <em>J</em><sup>−1</sup>), o que já inclui a correlação entre parâmetros.</li>
-            <li>Cada campeonato simulado sorteia um conjunto novo de parâmetros dessa distribuição (via decomposição de Cholesky) e usa esse conjunto em todos os seus jogos, com os placares sorteados direto da Poisson e a correção de Dixon-Coles aplicada por rejeição. Assim, um time "mais forte que o estimado" é mais forte em todos os jogos daquele campeonato, como na realidade.</li>
+            <li>Cada campeonato simulado sorteia um conjunto novo de parâmetros dessa distribuição (via decomposição de Cholesky) e usa esse conjunto em todos os seus jogos, com os placares sorteados da Poisson condicionada a 0–10 gols por lado e a correção de Dixon-Coles aplicada por rejeição. O tratamento da cauda coincide com o da grade de probabilidades. Assim, um time "mais forte que o estimado" é mais forte em todos os jogos daquele campeonato, como na realidade.</li>
             <li>Até a versão de 26/10/2026 eram usados 200 conjuntos fixos, sorteados uma vez. Isso acrescentava um ruído de cerca de ±1 ponto percentual que não diminuía com mais simulações; sortear a cada campeonato eliminou esse ruído, ao custo de deixar o cálculo cerca de 1,7 vez mais lento.</li>
             <li>As chances mostradas embaixo de cada jogo são a média de 200 grades sorteadas (distribuição preditiva).</li>
           </ol>
@@ -614,7 +640,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
 
         <section id="m-mc">
           <h2><span class="n">7</span>Simulação de Monte Carlo</h2>
-          <p>Cada campeonato simulado parte da tabela real (pontos, vitórias, saldo e gols pró), escolhe um conjunto de parâmetros, sorteia um placar para cada jogo em aberto (ou usa o seu palpite), ordena a tabela final e marca quem termina do 17º ao 20º lugar. Repetido <em>N</em> vezes, a chance de queda é a média dessas marcações<sup class="ref"><a href="#r14">[14]</a></sup>. O gerador é determinístico (mulberry32) e a semente vem do código do cenário: o mesmo cenário, na mesma precisão, dá sempre os mesmos números.</p>
+          <p>Cada campeonato simulado parte da tabela real (pontos, vitórias, saldo e gols pró), escolhe um conjunto de parâmetros, sorteia um placar para cada jogo em aberto (ou usa o seu palpite), ordena a tabela final e marca quem termina do 17º ao 20º lugar. Repetido <em>N</em> vezes, a chance de queda é a média dessas marcações<sup class="ref"><a href="#r14">[14]</a></sup>. O gerador é determinístico (mulberry32) e a semente vem do código do cenário: o mesmo cenário, na mesma precisão, base de jogos e versão do motor, dá os mesmos números. Atualizações podem alterar percentuais e migrar palpites de jogos ainda não disputados.</p>
         </section>
 
         <section id="m-desempate">
@@ -629,7 +655,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
             <li><b>Título, Libertadores e Sul-Americana</b>: fração das simulações em que o time termina em 1º (título), do 1º ao 5º (Libertadores: quatro vagas na fase de grupos e uma na fase preliminar) ou do 6º ao 11º (Sul-Americana), conforme a distribuição de vagas da temporada 2026<sup class="ref"><a href="#r17">[17]</a></sup>. O número de vagas pode ser alterado no painel do time em foco (fase de grupos, fase preliminar e Sul-Americana); a mudança vale para todo o painel, inclusive o histórico, que guarda a distribuição de posição final de cada time em cada rodada e por isso pode ser relido com qualquer configuração. Com fase preliminar, o painel da Libertadores separa a chance de fase de grupos e a de fase preliminar. Vagas extras abertas quando um clube brasileiro vence a Copa do Brasil, a Libertadores ou a Sul-Americana não são consideradas. Um empate na fronteira de uma zona divide as vagas igualmente. No painel do time em foco você escolhe a métrica, e todos os gráficos e tabelas do painel passam a usá-la.</li>
             <li><b>Pontuação final provável</b>: mediana da pontuação final simulada, com a faixa central de 80% (percentis 10 e 90): em 80% dos campeonatos simulados o time termina dentro dela.</li>
             <li><b>Rebaixamento por pontuação</b>: para cada pontuação final <em>k</em>, a fração dos times que caíram entre todos os que terminaram com <em>k</em> pontos, somando os 20 clubes de todas as simulações: P(cair | terminar com <em>k</em> pontos), a mesma leitura da tabela por pontuação da UFMG<sup class="ref"><a href="#r8">[8]</a></sup>.</li>
-            <li><b>Jogos decisivos</b>: as simulações são separadas pelo resultado sorteado em cada jogo e a chance de queda é recalculada em cada grupo. Cada coluna é P(cair | resultado), por isso as três não somam 100%; ponderadas pela chance de cada resultado, dão a chance de queda atual (lei da probabilidade total). O impacto é a diferença entre o maior e o menor valor. O ValorFinal usa a mesma separação no seu índice de impacto<sup class="ref"><a href="#r9">[9]</a></sup>.</li>
+            <li><b>Jogos decisivos</b>: as simulações são separadas pelo resultado sorteado em cada jogo e a chance de queda é recalculada em cada grupo. Cada coluna é P(cair | resultado), condicionada dentro da amostra preditiva; como o resultado sorteado está associado à força daquele universo, essa leitura pode diferir de fixar um palpite sem atualizar forças. Por isso as três não somam 100%; ponderadas pela chance de cada resultado, dão a chance de queda atual (lei da probabilidade total). O impacto é a diferença entre o maior e o menor valor. O ValorFinal usa a mesma separação no seu índice de impacto<sup class="ref"><a href="#r9">[9]</a></sup>.</li>
             <li><b>Evolução rodada a rodada</b>: até a última rodada real, cada ponto foi recalculado com o modelo atual usando só os jogos já disputados naquela data (parâmetros reestimados a cada rodada, 40 mil simulações). Depois, um ponto por rodada que você preencher.</li>
             <li><b>Status matemático</b> ("salvo" ou "caiu"): condição suficiente calculada só com pontos.</li>
           </ul>
@@ -637,7 +663,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
 
         <section id="m-precisao">
           <h2><span class="n">10</span>Precisão: leve, média e pesada</h2>
-          <p>Monte Carlo estima uma proporção com erro de amostragem conhecido. Para uma chance <em>p</em> estimada com <em>N</em> campeonatos:</p>
+          <p>Monte Carlo estima uma proporção com erro numérico de amostragem conhecido. Esse erro não é um intervalo para a probabilidade real: não inclui toda a incerteza de especificação, dos hiperparâmetros ou de mudanças futuras de força. Para uma chance <em>p</em> estimada com <em>N</em> campeonatos:</p>
           <div class="eq"><div>EP = √(<em>p</em>(1 − <em>p</em>) / <em>N</em>),  margem de 95% ≈ 1,96 · EP<span class="c">pior caso em <em>p</em> = 50%</span></div></div>
           <div class="tablewrap"><table class="mtable">
             <thead><tr><th class="l">Nível</th><th>Campeonatos</th><th>Margem na chance de queda</th><th>Margem num resultado de jogo decisivo*</th><th>Tempo neste navegador</th></tr></thead>
@@ -652,6 +678,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
 
         <section id="m-validacao">
           <h2><span class="n">11</span>Validação e calibração</h2>
+          <p class="note">Resultados históricos reportados na versão 3 original. O repositório atual não inclui os scripts, previsões individuais e partições usados nesse backtest; a independência entre seleção de hiperparâmetros e teste final ainda precisa ser documentada. Os testes de regressão da revisão de 01/11/2026 verificam o motor, mas não substituem a reexecução dessa avaliação nem validam título e faixas continentais.</p>
           <p><b>Probabilidades por jogo.</b> Validação rodada a rodada (walk-forward) nas temporadas 2015 a 2024 da Série A: para cada rodada, o modelo é ajustado só com os jogos anteriores (e o prior da temporada anterior) e prevê a rodada; 3.799 jogos previstos. Métricas: log loss e Ranked Probability Score, que respeita a ordem vitória, empate, derrota<sup class="ref"><a href="#r6">[6]</a></sup>. Menor é melhor.</p>
           <div class="tablewrap"><table class="mtable">
             <thead><tr><th class="l">Modelo</th><th>Log loss</th><th>RPS</th><th>Log loss nas rodadas 1 a 10</th></tr></thead>
@@ -687,7 +714,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
               <tr><td class="l">90 a 98%</td><td>23</td><td>94,9%</td><td>95,7%</td></tr>
               <tr><td class="l">98 a 100%</td><td>41</td><td>99,6%</td><td>100,0%</td></tr>
             </tbody></table></div>
-          <p class="note">As diferenças estão dentro do esperado para amostras desse tamanho; a maior, na faixa de 30 a 50%, tem 152 casos (margem de cerca de ±7 pp). A versão 2, na faixa de 0 a 2%, previa 0,3% e viu 2,3%.</p>
+          <p class="note">As previsões repetem clubes e desfechos ao longo de cada temporada, portanto não são observações independentes. Sem intervalos que respeitem essa dependência, esta tabela é descritiva e não demonstra calibração perfeita. A faixa de 0 a 2% ainda merece acompanhamento. A versão 2, na faixa de 0 a 2%, previa 0,3% e viu 2,3%.</p>
         </section>
 
         <section id="m-bench">
@@ -699,13 +726,13 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
               <tr><td class="l">Placar</td><td class="l">Poisson com Dixon-Coles, sorteio direto</td><td class="l">Resultado primeiro, placar depois (até 5 gols)</td><td class="l">Poisson a partir do Elo, até 12 gols</td><td class="l">Poisson com ajuste para empates</td></tr>
               <tr><td class="l">Incerteza da força</td><td class="l">Propagada (sorteio a cada campeonato)</td><td class="l">Não documentada</td><td class="l">Não</td><td class="l">Não detalhada</td></tr>
               <tr><td class="l">Simulações</td><td class="l">100 mil, 500 mil ou 1 milhão</td><td class="l">2 milhões</td><td class="l">20 mil</td><td class="l">20 mil</td></tr>
-              <tr><td class="l">Validação publicada</td><td class="l">Backtest de 10 temporadas</td><td class="l">Não</td><td class="l">Não</td><td class="l">Sim</td></tr>
+              <tr><td class="l">Validação publicada</td><td class="l">Backtest de 10 temporadas</td><td class="l">Não verificada nesta revisão</td><td class="l">Sim, na documentação atual</td><td class="l">Sim, referência histórica</td></tr>
             </tbody></table></div>
-          <p>Conferência na mesma base de jogos (<span class="asof"></span>, sem palpites):</p>
+          <p>Comparação exploratória: cálculo atual sem palpites versus valores arquivados do ValorFinal em <span id="benchDate"></span>. Bases e versões podem diferir; não é uma comparação de acurácia.</p>
           <div class="tablewrap"><table class="mtable" id="mBench">
             <thead><tr><th class="l">Time</th><th>Pontos</th><th>Este simulador</th><th>ValorFinal</th><th>Diferença</th></tr></thead>
             <tbody></tbody></table></div>
-          <p class="note">O ValorFinal usa um Elo só da temporada e não propaga incerteza; as diferenças maiores aparecem nos times do meio da briga.</p>
+          <p class="note">A documentação do ValorFinal já descreve versões posteriores à 1.2.0 e avaliação publicada. Consulte a fonte para o método atual. Diferenças entre percentuais, isoladamente, não demonstram superioridade preditiva.</p>
         </section>
 
         <section id="m-limites">
@@ -731,8 +758,8 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
             <li id="r6">Constantinou, A. C.; Fenton, N. E. (2012). Solving the problem of inadequate scoring rules for assessing probabilistic football forecast models. <i>Journal of Quantitative Analysis in Sports</i>, 8(1).</li>
             <li id="r7">Martins, R. V.; Lima, B. N. B.; Brochero, F.; Costa, G. N.; Zeferino, G. M. (2010). Probabilidades no futebol. <i>Matemática Universitária</i>, 48/49, 15–31.</li>
             <li id="r8">Departamento de Matemática da UFMG. Probabilidades no Futebol. <a href="https://www.mat.ufmg.br/futebol/" target="_blank" rel="noopener">mat.ufmg.br/futebol</a></li>
-            <li id="r9">ValorFinal. Metodologia do Modelo ValorFinal do Brasileirão, versão 1.2.0. <a href="https://valorfinal.com.br/brasileirao/metodologia" target="_blank" rel="noopener">valorfinal.com.br/brasileirao/metodologia</a></li>
-            <li id="r10">FiveThirtyEight. How Our Club Soccer Predictions Work. <a href="https://fivethirtyeight.com/features/how-our-club-soccer-predictions-work" target="_blank" rel="noopener">fivethirtyeight.com</a></li>
+            <li id="r9">ValorFinal. Metodologia do Modelo ValorFinal do Brasileirão (documentação atual; os valores comparados nesta página são um arquivo histórico). <a href="https://valorfinal.com.br/brasileirao/metodologia" target="_blank" rel="noopener">valorfinal.com.br/brasileirao/metodologia</a></li>
+            <li id="r10">FiveThirtyEight. How Our Club Soccer Predictions Work. <a href="https://fivethirtyeight.com/methodology/how-our-club-soccer-predictions-work/" target="_blank" rel="noopener">fivethirtyeight.com</a></li>
             <li id="r11">ValorFinal. Dados abertos do Brasileirão 2026 (placares com origem no football-data.org). <a href="https://valorfinal.com.br/brasileirao/dados-abertos" target="_blank" rel="noopener">valorfinal.com.br/brasileirao/dados-abertos</a></li>
             <li id="r12">Duque, A. Brasileirão Dataset, Série A 2003–2024. <a href="https://github.com/adaoduque/Brasileirao_Dataset" target="_blank" rel="noopener">github.com/adaoduque/Brasileirao_Dataset</a></li>
             <li id="r13">CBF. Regulamento Específico da Competição: Campeonato Brasileiro Série A 2026, critérios de desempate. <a href="https://www.cbf.com.br" target="_blank" rel="noopener">cbf.com.br</a></li>
@@ -947,7 +974,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
   function buildUniverses(R, pairs, K, seed) {
     var G = pairs.length, rng = mulberry32(seed == null ? 777 : seed);
     var L = cholesky(covariance(R), NP), z = new Float64Array(NP), th = new Float64Array(NP);
-    var cdfU = new Float32Array(K * G * CELLS), Pm = [], g, k, c, i, j;
+    var cdfU = new Float32Array(K * G * CELLS), Pm = [], meanH = new Float64Array(G), meanA = new Float64Array(G), g, k, c, i, j;
     for (g = 0; g < G; g++) Pm.push(new Float64Array(CELLS));
     for (k = 0; k < K; k++) {
       for (i = 0; i < NP; i++) z[i] = gauss(rng);
@@ -955,24 +982,25 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
       for (g = 0; g < G; g++) {
         var h = pairs[g][0], v = pairs[g][1];
         var lh = Math.exp(th[0] + th[1] + th[2 + h] - th[2 + NT + v]), la = Math.exp(th[0] + th[2 + v] - th[2 + NT + h]);
+        meanH[g] += lh / K; meanA[g] += la / K;
         var P = gridP(lh, la, R.rho), off = (k * G + g) * CELLS, acc = 0;
         for (c = 0; c < CELLS; c++) { acc += P[c]; cdfU[off + c] = acc; Pm[g][c] += P[c] / K; }
         cdfU[off + CELLS - 1] = 1;
       }
     }
-    var grids = pairs.map(function (p, gi) { var e = expectedGoals(R, p[0], p[1]); return gridFromP(Pm[gi], e[0], e[1]); });
+    var grids = pairs.map(function (p, gi) { return gridFromP(Pm[gi], meanH[gi], meanA[gi]); });
     return { K: K, G: G, cdfU: cdfU, grids: grids };
   }
   function pointGrids(R, pairs) { return pairs.map(function (p) { var e = expectedGoals(R, p[0], p[1]); return matchGrid(e[0], e[1], R.rho); }); }
 
   function sampleCell(cdf, u) {
     var lo = 0, hi = CELLS - 1;
-    while (lo < hi) { var m = (lo + hi) >> 1; if (cdf[m] < u) lo = m + 1; else hi = m; }
+    while (lo < hi) { var m = (lo + hi) >> 1; if (cdf[m] <= u) lo = m + 1; else hi = m; }
     return lo;
   }
   function sampleAt(arr, off, u) {
     var lo = 0, hi = CELLS - 1;
-    while (lo < hi) { var m = (lo + hi) >> 1; if (arr[off + m] < u) lo = m + 1; else hi = m; }
+    while (lo < hi) { var m = (lo + hi) >> 1; if (arr[off + m] <= u) lo = m + 1; else hi = m; }
     return lo;
   }
 
@@ -989,12 +1017,16 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
   function zonesFor(d, p, s) { return [['z4', 16, 19], ['tit', 0, 0], ['lib', 0, d + p - 1], ['libd', 0, d - 1], ['sula', d + p, d + p + s - 1]]; }
   function rankTable(pts, wins, gd, gf, order, key) {
     var i, j, t;
-    for (t = 0; t < NT; t++) { key[t] = ((pts[t] * 64 + wins[t]) * 512 + (gd[t] + 256)) * 512 + gf[t]; order[t] = t; }
+    function compare(a, b) { return pts[a] - pts[b] || wins[a] - wins[b] || gd[a] - gd[b] || gf[a] - gf[b]; }
+    // Compare os critérios diretamente: placares hipotéticos podem exceder os limites de uma chave compactada.
+    for (t = 0; t < NT; t++) order[t] = t;
     for (i = 1; i < NT; i++) {
-      t = order[i]; var k = key[t]; j = i - 1;
-      while (j >= 0 && key[order[j]] < k) { order[j + 1] = order[j]; j--; }
+      t = order[i]; j = i - 1;
+      while (j >= 0 && compare(order[j], t) < 0) { order[j + 1] = order[j]; j--; }
       order[j + 1] = t;
     }
+    // A chave serve somente para reconhecer empates, inclusive nas fronteiras das zonas.
+    for (i = 0; i < NT; i++) key[order[i]] = i && compare(order[i - 1], order[i]) === 0 ? key[order[i - 1]] : NT - i;
   }
   function zoneWeights(order, key, from, to, w) {
     for (var t = 0; t < NT; t++) w[t] = 0;
@@ -1035,7 +1067,15 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
        em cada simulação e os placares direto da Poisson, com a correção de Dixon-Coles por rejeição.
        Elimina o ruído de usar um conjunto finito de universos. */
     var F = opts.fresh || null, th = new Float64Array(NP), zz = new Float64Array(NP);
-    function poi(e, l, u) { var p = e, c = p, k = 0; while (u > c && k < MAXG) { k++; p *= l / k; c += p; } return k; }
+    function poi(e, l, u) {
+      // Condicione a Poisson a 0..MAXG, como gridP; não acumule toda a cauda em MAXG.
+      var p = e, total = p, k;
+      for (k = 1; k <= MAXG; k++) { p *= l / k; total += p; }
+      u *= total;
+      p = e; var c = p; k = 0;
+      while (u >= c && k < MAXG) { k++; p *= l / k; c += p; }
+      return k;
+    }
     function drawTheta() {
       for (var q = 0; q < NP; q += 2) {
         var u1 = rng(); if (u1 < 1e-300) u1 = 1e-300; var rr = Math.sqrt(-2 * Math.log(u1)), an = 2 * Math.PI * rng();
@@ -1058,7 +1098,9 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
         if (f && (x0 > y0 ? 1 : x0 === y0 ? 2 : 3) !== f) continue;
         return x0 * W + y0;
       }
-      return sampleCell(f ? open[gi].grid.cdfOut[f - 1] : open[gi].grid.cdf, rng());
+      // Resultado raro: mantenha o mesmo conjunto de forças ao recorrer à grade exata.
+      var fallback = matchGrid(lh, la, r);
+      return sampleCell(f ? fallback.cdfOut[f - 1] : fallback.cdf, rng());
     }
     var done = 0;
     function run(k) {
@@ -1076,7 +1118,18 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
             if (f) { // resultado fixado: rejeição dentro do universo, com reserva na grade preditiva
               var tries = 0;
               while (tries < 64) { x = (c / W) | 0; y = c % W; if ((x > y ? 1 : x === y ? 2 : 3) === f) break; c = sampleAt(U.cdfU, off, rng()); tries++; }
-              if (tries >= 64) c = sampleCell(open[g].grid.cdfOut[f - 1], rng());
+              if (tries >= 64) {
+                var acc = 0, cond = new Float64Array(CELLS), last = 0;
+                for (var cell = 0; cell < CELLS; cell++) {
+                  var mass = Math.max(0, U.cdfU[off + cell] - last); last = U.cdfU[off + cell];
+                  var cx = (cell / W) | 0, cy = cell % W;
+                  if ((cx > cy ? 1 : cx === cy ? 2 : 3) === f) acc += mass;
+                  cond[cell] = acc;
+                }
+                if (!(acc > 0)) throw new Error('Resultado sem massa no universo simulado.');
+                for (var cell = 0; cell < CELLS; cell++) cond[cell] /= acc;
+                cond[CELLS - 1] = 1; c = sampleCell(cond, rng());
+              }
             }
             x = (c / W) | 0; y = c % W;
           } else {
@@ -1415,7 +1468,7 @@ function finish(){
 }
 function paint(calc){
   if (!res) return;
-  renderStatus(calc); renderTable(); renderFocus(); renderMyCard(); $('#codeOut').value = curCode();
+  renderStatus(calc); renderTable(); renderFocus(); renderMyCard(); renderScenarioSummary(calc); $('#codeOut').value = curCode();
 }
 
 /* ---------- formatação ---------- */
@@ -1439,7 +1492,7 @@ function renderStatus(calc){
     '<span class="chip"><b>'+PLAYED.length+'</b> jogos reais até a '+CUR_ROUND+'ª rodada</span>'+
     '<span class="chip"><b>'+n+'</b> palpites seus · <b>'+rem+'</b> em aberto</span>'+
     '<span class="chip live'+(calc?' calc':'')+'"><i class="dot"></i>'+m+'</span>';
-  $('#precInfo').textContent = calc || !res ? '' : 'margem ±'+fmt2.format(margin(res)*100)+' pp'+(timing[level] ? ' · '+fmt1.format(timing[level]/1000)+' s' : '');
+  $('#precInfo').textContent = calc || !res ? '' : 'erro numérico ±'+fmt2.format(margin(res)*100)+' pp'+(timing[level] ? ' · '+fmt1.format(timing[level]/1000)+' s' : '');
 }
 
 /* ---------- render: tabela ---------- */
@@ -1473,7 +1526,7 @@ function renderTable(){
       dCell = '<td class="delta '+(better?'down':worse?'up':'muted')+'">'+ppTxt(d)+'</td>'; }
     rows.push('<tr data-i="'+s.i+'" class="'+zoneClass(k)+(k>=16?' inz4':'')+(s.i===focus?' focus':'')+(s.i===myTeam?' mine':'')+'">'+
       '<td class="pos">'+(k+1)+'</td>'+
-      '<td class="l"><div class="team"><span class="code">'+t.c+'</span><span class="tname">'+t.n+'</span>'+mine+'</div></td>'+
+      '<td class="l"><div class="team"><span class="code">'+t.c+'</span><button type="button" class="tname team-focus" aria-label="Analisar '+t.n+'">'+t.n+'</button>'+mine+'</div></td>'+
       '<td><b>'+s.P+'</b></td><td class="hide-sm">'+s.J+'</td><td class="hide-sm">'+s.V+'</td><td class="hide-sm">'+(s.SG>0?'+':'')+s.SG+'</td>'+
       '<td class="hide-sm muted">'+fmt1.format(res.ptsMean[s.i])+'</td>'+
       '<td><div class="risk">'+(tag ? tag : '<span class="bar"><i style="width:'+(Math.min(p,1)*100).toFixed(1)+'%;background:var('+D.color+')"></i></span><span class="pct">'+pctCell+'</span>')+'</div></td>'+
@@ -1505,8 +1558,7 @@ function renderTabs(){
 }
 function playedCards(){
   const ps = playedGames(curRound); if (!ps.length) return '';
-  const head = roundGames(curRound).length ? '<div class="gsep">Jogos encerrados</div>' : '';
-  return head + ps.map(p=>{
+  const cards = ps.map(p=>{
     const h = TEAMS[p.h], a = TEAMS[p.a];
     return '<div class="game played'+((p.h===focus||p.a===focus)?' hasfocus':'')+'">'+
       '<div class="when"><span>'+p.r+'ª rodada</span><span class="venue">encerrado</span></div>'+
@@ -1516,6 +1568,7 @@ function playedCards(){
       '<span class="tm'+(p.ga>p.gh?' me':'')+'" title="'+a.n+'">'+a.c+'</span>'+
       '</div><div class="pnames">'+h.n+' x '+a.n+'</div></div>';
   }).join('');
+  return roundGames(curRound).length ? '<details class="played-list"><summary>Ver '+ps.length+' jogos encerrados</summary><div class="games">'+cards+'</div></details>' : cards;
 }
 $('#tabs').addEventListener('click', e=>{ const b = e.target.closest('.tab'); if(!b) return; curRound = +b.dataset.r; renderTabs(); renderGames(); });
 function pc(x){ return fmt0.format(Math.round(x*100))+'%'; }
@@ -1560,8 +1613,6 @@ function renderGames(){
   $('#games').innerHTML = listedGames().map(({g,i})=>{
     const h = TEAMS[g.h], a = TEAMS[g.a], G = GRIDS[i];
     const vh = scH[i]>=0 ? scH[i] : '', va = scA[i]>=0 ? scA[i] : '';
-    const legacy = choice[i] && scH[i]<0; // palpite antigo só com resultado
-    const lg = legacy ? '<div class="legacy">palpite sem placar: '+(choice[i]===1?h.n+' vence':choice[i]===2?'empate':a.n+' vence')+' · digite o placar ou <button type="button" class="linkbtn" data-clear="'+i+'">apague</button></div>' : '';
     const whenTxt = team ? (g.r===21 ? 'adiado da 21ª · data a definir' : g.r+'ª rodada · '+shortWhen(g)) : shortWhen(g);
     const venue = team ? '<span class="venue">'+(g.h===focus?'em casa':'fora')+'</span>' : '';
     return '<div class="game'+((!team && (g.h===focus||g.a===focus))?' hasfocus':'')+(choice[i]?' filled':'')+'" data-g="'+i+'">'+
@@ -1575,12 +1626,18 @@ function renderGames(){
       '</div>'+
       '<div class="odds num" title="Chances do modelo: vitória do mandante · empate · vitória do visitante"><span>'+pc(G.pH)+'</span><span>'+pc(G.pD)+'</span><span>'+pc(G.pA)+'</span>'+
       '<span class="pbar"><i style="width:'+(G.pH*100).toFixed(1)+'%"></i><i style="width:'+(G.pD*100).toFixed(1)+'%"></i><i style="width:'+(G.pA*100).toFixed(1)+'%"></i></span>'+
-      '<span class="xg">gols esperados '+fmt1.format(G.lh)+' x '+fmt1.format(G.la)+'</span></div>'+lg+
+      '<span class="xg">gols esperados '+fmt1.format(G.lh)+' x '+fmt1.format(G.la)+'</span></div>'+
+      '<div class="quick-pick" role="group" aria-label="Palpite para '+h.n+' x '+a.n+'">'+
+      [1,2,3].map(c=>'<button type="button" data-pick="'+i+'" data-outcome="'+c+'" aria-pressed="'+(choice[i]===c && scH[i]<0)+'">'+(c===1?h.c+' vence':c===2?'Empate':a.c+' vence')+'</button>').join('')+'</div>'+
+      '<button type="button" class="linkbtn undo-pick" data-clear="'+i+'"'+(choice[i]?'':' hidden')+'>Desfazer palpite</button>'+
+      '<div class="score-hint" aria-live="polite">'+(choice[i] && scH[i]<0?'Resultado escolhido; placar sorteado entre os compatíveis.':'')+'</div>'+
       '</div>';
   }).join('') + (team ? '' : playedCards());
 }
 function clearScore(i){ scH[i] = -1; scA[i] = -1; }
 $('#games').addEventListener('click', e=>{
+  const pick = e.target.closest('[data-pick]');
+  if (pick){ const i = +pick.dataset.pick; choice[i] = +pick.dataset.outcome; clearScore(i); changed(); return; }
   const b = e.target.closest('[data-clear]'); if(!b) return;
   const i = +b.dataset.clear; choice[i] = 0; clearScore(i); changed();
 });
@@ -1591,12 +1648,15 @@ $('#games').addEventListener('input', e=>{
   const i = +box.dataset.i, fh = $('#scH-'+i), fa = $('#scA-'+i);
   const parse = el => { const t = el.value.trim(); if (t==='') return ''; const n = Number(t); return Number.isInteger(n) && n>=0 && n<=MAXSC ? n : null; };
   const x = parse(fh), y = parse(fa);
+  const card = box.closest('.game'), hint = card.querySelector('.score-hint');
   fh.setAttribute('aria-invalid', String(x===null)); fa.setAttribute('aria-invalid', String(y===null));
-  if (x===null || y===null) return;
-  if (x==='' && y===''){ if (!choice[i]) return; clearScore(i); choice[i] = 0; }
-  else if (x==='' || y==='') return;
-  else { if (scH[i]===x && scA[i]===y) return; scH[i]=x; scA[i]=y; choice[i]=outcomeOf(x,y); }
-  const card = box.closest('.game'); card.classList.toggle('filled', !!choice[i]); const lg = card.querySelector('.legacy'); if (lg) lg.remove();
+  if (x===null || y===null){ hint.textContent = 'Use gols inteiros de 0 a '+MAXSC+'. '+(choice[i]?'O palpite anterior continua aplicado.':'Este jogo continua em aberto.'); return; }
+  if (x==='' && y===''){ hint.textContent = ''; if (!choice[i]) return; clearScore(i); choice[i] = 0; }
+  else if (x==='' || y===''){ hint.textContent = 'Preencha os dois gols para aplicar. '+(choice[i]?'O palpite anterior continua aplicado.':'Este jogo continua em aberto.'); return; }
+  else { if (scH[i]===x && scA[i]===y){ hint.textContent = 'Placar aplicado: '+x+' x '+y+'.'; return; } scH[i]=x; scA[i]=y; choice[i]=outcomeOf(x,y); }
+  hint.textContent = choice[i] ? 'Placar aplicado: '+x+' x '+y+'.' : '';
+  card.classList.toggle('filled', !!choice[i]); card.querySelector('[data-clear]').hidden = !choice[i];
+  card.querySelectorAll('[data-pick]').forEach(b=>b.setAttribute('aria-pressed','false'));
   softChanged();
 });
 $('#btnClearRound').addEventListener('click', ()=>{ listedGames().forEach(x=>{ choice[x.i]=0; clearScore(x.i); }); changed(); });
@@ -1635,25 +1695,26 @@ let metric = 'z4';
 const MET = {
   z4:   {key:'z4',   histKey:'p', noun:'rebaixamento',          verb:'cair',                        color:'--z4',     good:false, evoAxis:'Chance de rebaixamento (%)',          lineLbl:'Chance de cair',                  ptsTitle:'Rebaixamento por pontuação'},
   tit:  {key:'tit',  histKey:'t', noun:'título',                verb:'ser campeão',                 color:'--yellow', good:true,  evoAxis:'Chance de título (%)',                lineLbl:'Chance de ser campeão',           ptsTitle:'Título por pontuação'},
-  lib:  {key:'lib',  histKey:'l', noun:'vaga na Libertadores',  verb:'ir à Libertadores',  color:'--moss',   good:true,  evoAxis:'Chance de Libertadores (%)',          lineLbl:'Chance de Libertadores',          ptsTitle:'Libertadores por pontuação'},
-  sula: {key:'sula', histKey:'s', noun:'vaga na Sul-Americana', verb:'ir à Sul-Americana', color:'--brown', good:true, evoAxis:'Chance de Sul-Americana (%)',        lineLbl:'Chance de Sul-Americana',         ptsTitle:'Sul-Americana por pontuação'}
+  lib:  {key:'lib',  histKey:'l', noun:'Top da Libertadores',  verb:'terminar na faixa-base da Libertadores',  color:'--lib',   good:true,  evoAxis:'Chance de Libertadores (%)',          lineLbl:'Chance de Libertadores',          ptsTitle:'Libertadores por pontuação'},
+  sula: {key:'sula', histKey:'s', noun:'faixa da Sul-Americana', verb:'terminar na faixa-base da Sul-Americana', color:'--sula', good:true, evoAxis:'Chance de Sul-Americana (%)',        lineLbl:'Chance de Sul-Americana',         ptsTitle:'Sul-Americana por pontuação'}
 };
 function verbOf(m){ const D = MET[m]; if (m!=='lib' && m!=='sula') return D.verb; const [a,b] = zoneRange(m); return b<a ? D.verb+' (sem vagas)' : D.verb+' ('+posTxt(a,b)+')'; }
 Object.values(MET).forEach(D=>{ D.prob = r=>r.m[D.key].prob; D.se = r=>r.m[D.key].se; D.pts = r=>r.m[D.key].pts; D.game = r=>r.m[D.key].game; });
 try { const v = localStorage.getItem(MET_KEY); if (MET[v]) metric = v; } catch(e){}
-const MET_TITLE = {z4:['Chance de queda por time','Queda'], tit:['Chance de título por time','Título'], lib:['Chance de Libertadores por time','Libertadores'], sula:['Chance de Sul-Americana por time','Sul-Americana']};
+const MET_TITLE = {z4:['Chance de queda por time','Queda'], tit:['Chance de título por time','Título'], lib:['Chance na faixa-base da Libertadores','Libertadores'], sula:['Chance na faixa-base da Sul-Americana','Sul-Americana']};
 function renderMetricToggle(){
+  $('#vagas').hidden = metric!=='lib' && metric!=='sula';
   document.querySelectorAll('#metricSel button, #tblMetric button').forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.m===metric)));
   $('#hTabela').textContent = MET_TITLE[metric][0]; $('#thMet').textContent = MET_TITLE[metric][1];
   $('#hDec').textContent = 'Jogos decisivos';
   const D = MET[metric];
   $('#hPts').textContent = D.ptsTitle;
-  $('#ptsNote').textContent = 'Linha: chance de '+verbOf(metric)+' para quem termina o campeonato com aquela pontuação, somando todos os times de todas as simulações. Barras: distribuição da pontuação final do time em foco. Os pontos de corte acima mudam com os seus palpites; quando mudam, o quadro fica destacado e mostra o valor sem palpites.'+(metric==='lib'||metric==='sula'?' Vagas extras abertas por campeões de Copa do Brasil, Libertadores ou Sul-Americana não são consideradas.':'');
+  $('#ptsNote').textContent = 'Linha: chance de '+verbOf(metric)+' para quem termina o campeonato com aquela pontuação, somando todos os times de todas as simulações. Barras: distribuição da pontuação final do time em foco. Os pontos de corte acima são estimativas agregadas, não garantias individuais, e mudam com os seus palpites; quando mudam, o quadro fica destacado e mostra o valor sem palpites.'+' A curva agrega os clubes; não é uma garantia individual. Extremos dependem da quantidade de casos e não são limites matemáticos.'+(metric==='lib'||metric==='sula'?' São faixas de posição, sem redistribuição por copas.':'');
 }
 function renderVagas(){
   $('#vgD').value = VAGAS.d; $('#vgP').value = VAGAS.p; $('#vgS').value = VAGAS.s;
   const L = VAGAS.d+VAGAS.p, [sa, sb] = zoneRange('sula');
-  $('#vgInfo').textContent = 'Libertadores: '+posTxt(0, L-1)+(VAGAS.p?' ('+posTxt(0,VAGAS.d-1)+' na fase de grupos, '+posTxt(VAGAS.d, L-1)+' na preliminar)':'')+' · Sul-Americana: '+(sb<sa?'sem vagas':posTxt(sa, sb))+(vagasDefault()?' · padrão de 2026':'');
+  $('#vgInfo').textContent = 'Libertadores: '+posTxt(0, L-1)+(VAGAS.p?' ('+posTxt(0,VAGAS.d-1)+' na fase de grupos, '+posTxt(VAGAS.d, L-1)+' na preliminar)':'')+' · Sul-Americana: '+(sb<sa?'sem vagas':posTxt(sa, sb))+(vagasDefault()?' · padrão de 2026':'')+' · Faixas de posição, não classificação por todas as vias. Não incluem redistribuição nem exclusão de clubes classificados por copas.';
   $('#vgReset').hidden = vagasDefault();
 }
 function setVagas(v, silent){
@@ -1696,6 +1757,7 @@ function ptsStats(t, r){
 }
 function renderFocus(){
   if (!res) return;
+  renderScenarioSummary(Boolean(job));
   const t = focus, D = MET[metric], p = D.prob(res)[t], se = D.se(res)[t];
   const st = buildState(choice,null,scH,scA);
   const big = $('#bigPct'), lbl = $('#bigLbl'), sub = $('#bigSub');
@@ -1713,7 +1775,7 @@ function renderFocus(){
     const k = metric==='tit' ? 1 : metric==='lib' ? VAGAS.d+VAGAS.p : 0;
     const ms = k ? E.mathTop(st.shown, st.free, k)[t] : null;
     big.textContent = ms==='garantido' ? '100%' : ms==='fora' ? '0%' : pctTxt(p);
-    const names = {tit:['campeão matematicamente','sem chance matemática de título','chance de título'], lib:['vaga na Libertadores garantida matematicamente','sem chance matemática de Libertadores','chance de Libertadores'], sula:['','','chance de Sul-Americana']}[metric];
+    const names = {tit:['campeão matematicamente','sem chance matemática de título','chance de título'], lib:['Top '+(VAGAS.d+VAGAS.p)+' garantido matematicamente','sem chance matemática de Top '+(VAGAS.d+VAGAS.p),'chance na faixa-base da Libertadores'], sula:['','','chance na faixa-base da Sul-Americana']}[metric];
     lbl.textContent = ms==='garantido' ? names[0] : ms==='fora' ? names[1] : names[2]+tail;
     if (metric==='lib' || metric==='sula'){
       const [a,b] = zoneRange(metric);
@@ -1722,17 +1784,27 @@ function renderFocus(){
         const pd = res.m.libd.prob[t];
         txt += ' · grupos: '+pctTxt(pd)+' · preliminar: '+pctTxt(Math.max(p-pd,0));
       }
-      sub.textContent = txt; sub.hidden = false;
+      sub.textContent = txt+' · faixa de posição; sem redistribuição por copas'; sub.hidden = false;
     }
   }
   const rem = st.free.filter(g=>g.h===t||g.a===t).length, ps = ptsStats(t);
   $('#facts').innerHTML =
-    '<div><span class="muted">Pontos hoje</span><b class="num">'+st.shown.pts[t]+'</b></div>'+
+    '<div><span class="muted">'+(filled()?'Pontos no cenário':'Pontos hoje')+'</span><b class="num">'+st.shown.pts[t]+'</b></div>'+
     '<div><span class="muted">Jogos em aberto</span><b class="num">'+rem+'</b></div>'+
     '<div><span class="muted">Pontuação final provável</span><b class="num">'+ps.med+'</b><small class="muted">80% entre '+ps.lo+' e '+ps.hi+'</small></div>'+
     (filled() && baseRes ? (()=>{ const b = ptsStats(t, baseRes), d = ps.med-b.med; return '<div><span class="muted">Pontuação sem seus palpites</span><b class="num">'+b.med+'</b><small class="muted">80% entre '+b.lo+' e '+b.hi+(d?' · seus palpites: '+(d>0?'+':'−')+Math.abs(d)+' pts':' · palpites não mudam')+'</small></div>'; })() : '')+
     (filled() && baseRes ?'<div><span class="muted">Chance sem seus palpites</span><b class="num">'+pctTxt(D.prob(baseRes)[t])+'</b></div>':'');
   renderDecisive(); renderPoints(); renderEvo();
+}
+
+function renderScenarioSummary(calc){
+  const box = $('#scenarioSummary');
+  box.hidden = !filled();
+  if (!filled()) return;
+  if (!res || !baseRes){ box.textContent = 'Calculando o efeito dos seus '+filled()+' palpites…'; return; }
+  const D = MET[metric], before = D.prob(baseRes)[focus], after = D.prob(res)[focus], delta = after-before;
+  box.innerHTML = '<div><b>'+TEAMS[focus].n+'</b><span>'+D.noun+' · '+filled()+(filled()===1?' palpite':' palpites')+(calc?' · calculando…':'')+'</span></div>'+
+    '<div class="scenario-values num"><span><small>Sem palpites</small><b>'+pctTxt(before)+'</b></span><span aria-hidden="true">→</span><span><small>Seu cenário</small><b>'+pctTxt(after)+'</b></span><strong>'+ppTxt(delta)+' pp</strong></div>';
 }
 
 /* ---------- jogos decisivos ---------- */
@@ -1757,12 +1829,13 @@ function renderDecisive(){
     const label = '<span class="code">'+h.c+'</span> x <span class="code">'+a.c+'</span>';
     if (row.fixed){ const c = choice[row.i]; const sc = scoreTxt(row.i); const txt = sc ? h.n+' '+sc+' '+a.n : (c===1?h.n+' vence':c===2?'Empate':a.n+' vence');
       return '<tr class="fixed'+(own?' own':'')+'"><td class="l g">'+label+'</td><td colspan="4" class="l">Palpite lançado: '+txt+'</td></tr>'; }
-    const G = GRIDS[row.i], po = [G.pH, G.pD, G.pA];
+    const total = res.gameCnt[row.i*3]+res.gameCnt[row.i*3+1]+res.gameCnt[row.i*3+2];
+    const po = [0,1,2].map(o=>res.gameCnt[row.i*3+o]/total);
     const cells = row.v.map((x,o)=>{ if (x==null) return '<td>–</td>'; const d = x-p;
       return '<td><div class="cell"><b class="num">'+pctTxt(x)+'</b><small class="'+cls(d)+'">'+ppTxt(d)+' pp</small><small class="muted">resultado: '+pc(po[o])+'</small></div></td>'; }).join('');
     return '<tr class="'+(own?'own':'')+'"><td class="l g">'+label+'</td>'+cells+'<td class="impact num">'+fmt1.format(row.imp*100)+'</td></tr>';
   }).join('');
-  $('#decNote').textContent = 'Cada coluna responde a uma pergunta diferente: qual é a chance de '+TEAMS[t].n+' '+verbOf(metric)+' se aquele resultado acontecer. Por isso as três colunas não somam 100%. Ponderadas pela chance de cada resultado (linha "resultado"), elas dão os '+pctTxt(p)+' atuais. Abaixo de cada valor, a variação em pontos percentuais. Ordenado pelo impacto, com o jogo do próprio time primeiro. Cada coluna usa só as simulações em que aquele resultado saiu, por isso a margem aqui é maior que na tabela.';
+  $('#decNote').textContent = 'Cada coluna responde a uma pergunta diferente: qual é a chance de '+TEAMS[t].n+' '+verbOf(metric)+' se aquele resultado acontecer. Por isso as três colunas não somam 100%. Ponderadas pela frequência de cada resultado nesta simulação, elas dão os '+pctTxt(p)+' atuais. Abaixo de cada valor, a variação em pontos percentuais. Ordenado pelo impacto, com o jogo do próprio time primeiro. Cada coluna usa só as simulações em que aquele resultado saiu, por isso a margem aqui é maior que na tabela. Condicionar aos resultados sorteados também seleciona forças dos times; este cálculo pode diferir de fixar um palpite, que preserva a distribuição de forças.';
 }
 
 /* ---------- gráficos ---------- */
@@ -1875,7 +1948,7 @@ function renderEvo(){
     const histZ = HIST.map(h=>zoneFromPos(h.pos, metric));
     const peak = u => Math.max(cur[u], ...histZ.map(z=>z[u]));
     const others = cur.map((p,u)=>({p,u,pk:peak(u)})).filter(x=>x.u!==t && x.p<0.995 && (x.p>0.02 || (metric!=='z4' && x.pk>0.1)))
-      .sort((a,b)=>b.p-a.p || b.pk-a.pk).slice(0,7);
+      .sort((a,b)=>b.p-a.p || b.pk-a.pk).slice(0,3);
     others.forEach(o=>datasets.push({label:TEAMS[o.u].n, data:lineFor(o.u), borderColor:css('--line'), backgroundColor:css('--line'), borderWidth:1.5, pointRadius:0, pointHoverRadius:3, tension:.2, segment:scenSeg, spanGaps:false}));
   }
   const col = css(D.color);
@@ -1895,18 +1968,24 @@ $('#chkOthers').addEventListener('change', renderEvo);
 let calcTimer = null;
 function changed(){
   save(); renderTabs(); renderGames(); $('#codeOut').value = curCode();
+  pendingSummary();
   clearTimeout(calcTimer); calcTimer = setTimeout(startJob, 40);
 }
 function softChanged(){
   save(); renderTabs(); $('#codeOut').value = curCode();
+  pendingSummary();
   clearTimeout(calcTimer); calcTimer = setTimeout(startJob, 250);
+}
+function pendingSummary(){
+  const box = $('#scenarioSummary'); box.hidden = !filled();
+  box.textContent = 'Recalculando o efeito dos seus '+filled()+' palpites…';
 }
 
 /* ---------- compartilhar ---------- */
 function msg(el, text){ $(el).textContent = text; clearTimeout(msg[el]); msg[el] = setTimeout(()=>{ $(el).textContent=''; }, 6000); }
 async function copyCode(){
   const code = curCode(); $('#codeOut').value = code;
-  try { await navigator.clipboard.writeText(code); msg('#codeMsg','Código copiado. Quem colar este código, no mesmo nível de precisão, vê os mesmos palpites e percentuais.'); }
+  try { await navigator.clipboard.writeText(code); msg('#codeMsg','Código copiado. Ele guarda os palpites e a configuração de vagas. Os percentuais coincidem na mesma base de jogos, versão do modelo e precisão; podem mudar após atualizações.'); }
   catch(e){ $('#codeOut').select(); msg('#codeMsg','Selecionei o código; copie com Ctrl+C (ou toque e segure no celular).'); }
 }
 $('#btnCopy').addEventListener('click', copyCode);
@@ -1976,6 +2055,7 @@ function renderMethod(){
     '<td>'+fmt2.format(r.gp)+'</td><td>'+fmt2.format(r.gc)+'</td><td>'+(r.gp-r.gc>=0?'+':'−')+fmt2.format(Math.abs(r.gp-r.gc))+'</td></tr>').join('');
 }
 function renderBench(){
+  $('#benchDate').textContent = DATA.bench.date.split('-').reverse().join('/');
   const vf = DATA.bench.vf;
   const rows = TEAMS.map((t,i)=>({t,i,us:baseRes.prob[i]*100, vf:vf[i], P:REAL[i].P})).filter(x=>x.us>0.05||x.vf>0.05).sort((a,b)=>b.us-a.us);
   $('#mBench tbody').innerHTML = rows.map(r=>{ const d = r.us-r.vf;
@@ -2020,11 +2100,14 @@ function renderMyCard(){
   const order = ['tit','lib','sula','z4'];
   let mets = order.filter(m=>{ const p = MET[m].prob(res)[t]; return p>0.001 && p<0.999; }).slice(0,3);
   if (!mets.length) mets = [MET.z4.prob(res)[t]>0.5 ? 'z4' : 'lib'];
-  const since = snapDate(PREV), lbl = {tit:'Título', lib:'Libertadores', sula:'Sul-Americana', z4:'Queda'};
+  const since = snapDate(PREV), lbl = {tit:'Título', lib:'Libertadores · faixa-base', sula:'Sul-Americana · faixa-base', z4:'Queda'};
   const cells = mets.map(m=>{
     const D = MET[m], p = D.prob(res)[t];
     let dl = '';
-    if (SNAP && PREV){
+    if (filled() && baseRes){
+      const d = p - D.prob(baseRes)[t];
+      dl = '<small>'+ppTxt(d)+' pp com seus palpites</small>';
+    } else if (SNAP && PREV){
       const d = zoneFromPos(SNAP.pos, m)[t] - zoneFromPos(PREV.pos, m)[t];
       const better = D.good ? d>0.0005 : d<-0.0005, worse = D.good ? d<-0.0005 : d>0.0005;
       dl = Math.abs(d)<0.0005 ? '<small class="muted">sem mudança desde '+since+'</small>'
@@ -2033,7 +2116,7 @@ function renderMyCard(){
     return '<div class="mc-met"><span class="mc-lbl">'+lbl[m]+'</span><b class="num" style="color:var('+(m==='z4'?'--z4':'--ink')+')">'+pctTxt(p)+'</b>'+dl+'</div>';
   }).join('');
   let story = '';
-  if (SNAP && PREV && SNAP.added && SNAP.added.length){
+  if (!filled() && SNAP && PREV && SNAP.added && SNAP.added.length){
     const mine = SNAP.added.filter(g=>g[0]===t||g[1]===t).map(g=>TEAMS[g[0]].n+' '+g[2]+' x '+g[3]+' '+TEAMS[g[1]].n);
     story = mine.length ? 'Desde '+since+': '+mine.join('; ')+'.' : TEAMS[t].n+' não jogou desde '+since+'; a variação vem dos outros resultados.';
   }
@@ -2080,7 +2163,7 @@ fillSelect(); fillRoundSelect(); renderTabs(); renderGames(); renderStatus(true)
 { const h = (location.hash||'').replace('#',''); if (h==='metodologia' || h==='tutorial') setView(h); }
 document.querySelectorAll('[data-goto]').forEach(a=>a.addEventListener('click', e=>{ e.preventDefault(); setView(a.dataset.goto); window.scrollTo({top:0}); }));
 renderMyCard();
-if (PAGE_TEAM==null && myTeam==null && !mySkipped) openTeamModal();
+// A escolha do clube é opcional e fica disponível no cartão; não bloqueie a primeira visita.
 startJob();
 initDb();
 })();
