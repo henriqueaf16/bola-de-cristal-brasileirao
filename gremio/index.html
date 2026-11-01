@@ -28,7 +28,7 @@
   --moss:#4e6035; --moss-soft:#dfe3cd; --on-moss:#faf7f1;
   --brown:#7a5636; --brown-soft:#eadccb;
   --yellow:#c99419; --yellow-soft:#f4e5bb;
-  --c-tit:#c99419; --c-lib:#4e6035; --c-sula:#7a5636; /* cores das zonas (tabela, legenda, gráficos) */
+  --c-tit:#a87b10; --c-lib:#4e6035; --c-sula:#4f6d8a; /* cores das zonas (tabela, legenda, gráficos) */
   --z4:#a3432b; --z4-soft:#f1dcd2; --good:#4e6035;
   --f-main:"Montserrat",system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-detail:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -39,14 +39,14 @@
   --moss:#a6ba7f; --moss-soft:#2f3625; --on-moss:#1a1915;
   --brown:#cfa57c; --brown-soft:#3a2f24;
   --yellow:#e4b84d; --yellow-soft:#3d3420;
-  --c-tit:#e4b84d; --c-lib:#a6ba7f; --c-sula:#cfa57c;
+  --c-tit:#e4b84d; --c-lib:#a6ba7f; --c-sula:#9db8d3;
   --z4:#e5866e; --z4-soft:#40271f; --good:#a6ba7f; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#1a1915; --surface:#23211b; --surface-2:#2d2a22; --ink:#ede6d6; --muted:#a69e8b; --line:#3b372c;
   --moss:#a6ba7f; --moss-soft:#2f3625; --on-moss:#1a1915;
   --brown:#cfa57c; --brown-soft:#3a2f24;
   --yellow:#e4b84d; --yellow-soft:#3d3420;
-  --c-tit:#e4b84d; --c-lib:#a6ba7f; --c-sula:#cfa57c;
+  --c-tit:#e4b84d; --c-lib:#a6ba7f; --c-sula:#9db8d3;
   --z4:#e5866e; --z4-soft:#40271f; --good:#a6ba7f; color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -71,7 +71,12 @@ a{color:var(--moss);text-underline-offset:2px}
 /* topo */
 .top{display:flex;flex-wrap:wrap;gap:16px 24px;align-items:flex-end;justify-content:space-between}
 .top .meta{display:flex;flex-direction:column;gap:8px;max-width:72ch;min-width:0}
+.topctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;align-self:flex-start}
 .views{display:flex;gap:4px;background:var(--surface-2);border-radius:999px;padding:4px;align-self:flex-start}
+.themebtn{display:inline-flex;align-items:center;gap:6px;border:0;background:var(--surface-2);color:var(--muted);border-radius:999px;padding:8px 14px;font-weight:600;font-size:.84rem;min-height:36px}
+.themebtn:hover{color:var(--ink)}
+.themebtn svg{width:16px;height:16px;flex:0 0 auto}
+@media (max-width:560px){.themebtn span{display:none}.themebtn{padding:8px 11px}}
 .views button{border:0;background:transparent;border-radius:999px;padding:7px 16px;font-weight:600;font-size:.88rem;color:var(--muted)}
 .views button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(40,30,10,.12)}
 .statusline{display:flex;flex-wrap:wrap;gap:8px;font-family:var(--f-detail);font-size:.84rem}
@@ -315,6 +320,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
 }
 </style>
 
+<script>try{var bcT=localStorage.getItem('bc-tema');if(bcT==='dark'||bcT==='light')document.documentElement.setAttribute('data-theme',bcT);}catch(e){}</script>
 <div class="wrap">
   <header class="top">
     <div class="meta">
@@ -322,10 +328,13 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
       <h1>Bola de Cristal</h1>
       <div class="statusline" id="status"></div>
     </div>
+    <div class="topctl">
     <div class="views" role="tablist" aria-label="Seções">
       <button type="button" role="tab" id="vSim" aria-selected="true" data-view="sim">Simulador</button>
       <button type="button" role="tab" id="vMet" aria-selected="false" data-view="metodologia">Metodologia</button>
       <button type="button" role="tab" id="vTut" aria-selected="false" data-view="tutorial">Tutorial</button>
+    </div>
+    <button type="button" class="themebtn" id="btnTheme"></button>
     </div>
   </header>
 
@@ -2040,6 +2049,24 @@ document.querySelectorAll('.toc a').forEach(a=>a.addEventListener('click', e=>{
 function rerenderCharts(){ if (res){ renderPoints(); renderEvo(); } }
 try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', rerenderCharts); } catch(e){}
 new MutationObserver(rerenderCharts).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+/* botão claro/escuro: começa pelo tema do sistema; a escolha fica guardada no navegador */
+const THEME_KEY = 'bc-tema';
+const ICON_MOON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" fill="currentColor"/></svg>';
+const ICON_SUN = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="currentColor"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></g></svg>';
+function curTheme(){ const t = document.documentElement.getAttribute('data-theme'); if (t==='dark'||t==='light') return t; try { return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; } catch(e){ return 'light'; } }
+function renderThemeBtn(){
+  const dark = curTheme()==='dark', b = $('#btnTheme');
+  b.innerHTML = (dark ? ICON_SUN : ICON_MOON)+'<span>'+(dark ? 'Tema claro' : 'Tema escuro')+'</span>';
+  b.setAttribute('aria-label', dark ? 'Mudar para o tema claro' : 'Mudar para o tema escuro');
+}
+$('#btnTheme').addEventListener('click', ()=>{
+  const next = curTheme()==='dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  try { localStorage.setItem(THEME_KEY, next); } catch(e){}
+  renderThemeBtn();
+});
+try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', renderThemeBtn); } catch(e){}
+renderThemeBtn();
 
 /* ---------- meu time ---------- */
 const SNAP = DATA.snap, PREV = DATA.prevSnap;
