@@ -16,3 +16,21 @@ Simulador do Brasileirão Série A 2026. Joga o restante do campeonato milhares 
 A força de ataque e de defesa de cada clube é estimada por um modelo de Poisson (família Maher / Dixon-Coles), com prior da temporada 2025, peso maior para os jogos recentes e incerteza dos parâmetros. Cada jogo em aberto é sorteado a partir da distribuição de placares, e o campeonato inteiro é simulado por Monte Carlo (100 mil a 1 milhão de vezes). A metodologia completa, com fórmulas e referências, está na aba *Metodologia* do próprio site.
 
 O cálculo roda inteiro no navegador de quem acessa. O site é um único arquivo, `index.html`, atualizado após cada rodada com os resultados oficiais.
+
+## Identidade e compartilhamento
+
+A bola com gomos de futebol gira enquanto o cálculo está em andamento e respeita a preferência de movimento reduzido. As cores dos clubes aparecem em detalhes, sem escudos. No painel do time em foco, **Gerar card** cria um PNG vertical de 1080 × 1920, sem o contador de simulações.
+
+O compartilhamento inclui um link com os palpites, placares, configuração de vagas, time, objetivo e precisão. O cenário é restaurado ao abrir o link. Os percentuais podem mudar com atualizações dos dados ou do modelo. Há opções para compartilhar imagem e link em aparelhos compatíveis, copiar o link e abrir a mensagem no WhatsApp.
+
+## Verificação e páginas dos clubes
+
+Com Node.js 24 ou superior, sem instalar dependências:
+
+```sh
+node scripts/sync-team-pages.mjs
+node scripts/sync-team-pages.mjs --check
+node --test --test-isolation=none tests/engine.test.cjs tests/scenario-links.test.cjs
+```
+
+Edite a aplicação em `index.html` e execute a sincronização para atualizar as 20 páginas dos clubes preservando seus metadados.
