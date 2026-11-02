@@ -1821,7 +1821,7 @@ function renderMetricToggle(){
   $('#hTabela').textContent = MET_TITLE[metric][0]; $('#thMet').textContent = MET_TITLE[metric][1];
   $('#hDec').textContent = 'Jogos decisivos';
   const D = MET[metric];
-  $('#kpiLbl').textContent = 'Pontos de corte · '+D.noun;
+  $('#kpiLbl').textContent = 'Pontos de corte do campeonato · '+D.noun;
   if (typeof renderPtsTabs==='function' && $('#ptsTabs')) renderPtsTabs();
 }
 function renderVagas(){
@@ -1999,14 +1999,25 @@ function paintStory(canvas, data){
   if(data.metric==='lib'||data.metric==='sula')text('Terminar do '+data.range+' lugar',88,1104,31,400,muted,904);
   else text('O futuro ainda está em jogo.',88,1104,31,400,muted);
   ctx.strokeStyle='#d0c5af';ctx.beginPath();ctx.moveTo(88,1180);ctx.lineTo(992,1180);ctx.stroke();
+  // faixa de 100%: onde o time termina, por zona (cores fixas do tema claro)
+  text('ONDE '+data.team.n.toUpperCase()+' TERMINA',88,1240,25,600,muted,904);
+  const ZC={'Título':'#a87b10','Libertadores (grupos)':'#4e6035','Pré-Libertadores':'#97a978','Sul-Americana':'#4f6d8a','Meio da tabela':'#d3c8b2','Queda':'#a3432b'};
+  const segs=data.zones.filter(z=>z.v>=0.0005), tot=segs.reduce((a,z)=>a+z.v,0)||1;
+  ctx.save(); ctx.beginPath(); ctx.roundRect(88,1264,904,64,12); ctx.clip();
+  let x=88; segs.forEach(z=>{ const w=904*z.v/tot; ctx.fillStyle=ZC[z.n]||'#d3c8b2'; ctx.fillRect(x,1264,w+1,64);
+    if(z.v>=0.07){ ctx.fillStyle=(z.n==='Meio da tabela'||z.n==='Pré-Libertadores')?ink:'#ffffff'; ctx.font='700 27px Montserrat, system-ui, sans-serif'; const t=Math.round(z.v*100)+'%'; ctx.fillText(t,x+w/2-ctx.measureText(t).width/2,1306); }
+    x+=w; });
+  ctx.restore();
+  let lx=88, ly=1378; ctx.font='500 24px Montserrat, system-ui, sans-serif';
+  segs.forEach(z=>{ const lbl=z.n+' '+(z.v<0.001?'<0,1%':(z.v*100).toFixed(1).replace('.',',')+'%'), w=ctx.measureText(lbl).width+46;
+    if(lx+w>992){ lx=88; ly+=40; } ctx.fillStyle=ZC[z.n]||'#d3c8b2'; ctx.fillRect(lx,ly-18,18,18); ctx.fillStyle=muted; ctx.fillText(lbl,lx+26,ly); lx+=w; });
   const scenario=data.picks ? 'Cenário com '+data.picks+(data.picks===1?' palpite seu':' palpites seus') : 'Cenário sem palpites';
-  ctx.fillStyle='#dfe3cd';ctx.beginPath();ctx.roundRect(88,1230,904,70,14);ctx.fill();
-  text(scenario,115,1276,28,600,moss,850);
-  text('Seu palpite',88,1494,58,700,moss);
-  text('muda o jogo.',88,1565,58,700,moss);
-  text('boladecristal.app.br',88,1690,42,700,ink);
-  text('Dados de '+data.date,88,1752,25,400,muted,904);
-  text('Estimativa do modelo, não garantia de resultado.',88,1798,23,400,muted,904);
+  ctx.fillStyle='#dfe3cd';ctx.beginPath();ctx.roundRect(88,1470,904,70,14);ctx.fill();
+  text(scenario,115,1516,28,600,moss,850);
+  text('Seu palpite muda o jogo.',88,1640,52,700,moss,904);
+  text('boladecristal.app.br',88,1730,42,700,ink);
+  text('Dados de '+data.date,88,1784,25,400,muted,904);
+  text('Estimativa do modelo, não garantia de resultado.',88,1826,23,400,muted,904);
   return canvas.toDataURL('image/png');
 }
 $('#btnGenerateCard').addEventListener('click', async ()=>{
@@ -2015,7 +2026,7 @@ $('#btnGenerateCard').addEventListener('click', async ()=>{
   if(generatedCard)URL.revokeObjectURL(generatedCard.downloadUrl);
   generatedCard=null;$('#cardPreview').removeAttribute('src');
   $('#btnDownloadCard').disabled=true;$('#btnCopyScenarioLink').disabled=true;$('#btnShareCard').hidden=true;$('#btnWhatsApp').removeAttribute('href');
-  const data={team:TEAMS[focus],colors:CLUB_COLORS[TEAMS[focus].c],metric,percent:$('#bigPct').textContent,code:curCode(),precision:level,picks:filled(),top:VAGAS.d+VAGAS.p,range:(()=>{const [a,b]=zoneRange(metric);return posTxt(a,b);})(),date:(DATA.asof.match(/\d{2}\/\d{2}\/\d{4}/)||[DATA.asof])[0]};
+  const data={team:TEAMS[focus],colors:CLUB_COLORS[TEAMS[focus].c],metric,percent:$('#bigPct').textContent,code:curCode(),precision:level,picks:filled(),top:VAGAS.d+VAGAS.p,range:(()=>{const [a,b]=zoneRange(metric);return posTxt(a,b);})(),zones:zoneSegsOf(res,focus).map(z=>({n:z.n,v:z.v})),date:(DATA.asof.match(/\d{2}\/\d{2}\/\d{4}/)||[DATA.asof])[0]};
   try{
     if(document.fonts)await document.fonts.ready;
     const url=paintStory(document.createElement('canvas'),data), binary=atob(url.split(',')[1]);
@@ -2113,7 +2124,7 @@ const PV_KEY = 'bc-pv'; let ptsView = 'team';
 try { const v = localStorage.getItem(PV_KEY); if (v==='team'||v==='pts'||v==='all') ptsView = v; } catch(e){}
 const PV_NOTES = {
   team: 'Barras: chance de o time em foco terminar em cada posição, nas cores da zona. A faixa abaixo soma as posições de cada zona e dá 100%. Com palpites, as barras vazadas mostram o cenário sem palpites.',
-  pts: 'Linhas: chance de terminar em cada zona para quem chega àquela pontuação final, somando todos os times de todas as simulações; a linha mais grossa é o objetivo escolhido no painel. Barras claras: distribuição da pontuação final do time em foco. Os pontos de corte acima valem para o objetivo escolhido; com palpites, os que mudarem ficam destacados com o valor sem palpites. A maior ou menor pontuação vista nas simulações não é um limite matemático.',
+  pts: 'Linhas: se o time em foco terminar com aquela pontuação, qual a chance de cada zona; a linha mais grossa é o objetivo escolhido no painel. Pontuações que aparecem em poucas simulações ficam de fora, para não mostrar ruído. Barras claras: chance de o time terminar com cada pontuação. Os pontos de corte acima são do campeonato: para cada pontuação, somam-se todos os times de todas as simulações. Com palpites, os que mudarem ficam destacados com o valor sem palpites. A maior ou menor pontuação vista nas simulações não é um limite matemático.',
   all: 'Cada linha é um time, na ordem da tabela atual, com a chance de terminar em cada zona (soma 100%). Clique num time para analisá-lo.'
 };
 function renderPtsTabs(){
@@ -2152,7 +2163,9 @@ function renderCurves(){
   const M = res.MAXP, N = res.sims, t = focus, gc = new Float64Array(M);
   for (let u=0;u<NT;u++) for (let p=0;p<M;p++) gc[p] += res.ptsCnt[u*M+p];
   const keys = ['tit','lib','sula','z4'].filter(k=>{ if (k!=='lib' && k!=='sula') return true; const [a,b] = zoneRange(k); return a<=b; });
-  const curve = k => { const PR = res.m[k].pts, gr = new Float64Array(M); for (let u=0;u<NT;u++) for (let p=0;p<M;p++) gr[p] += PR[u*M+p]; return p => gc[p] ? gr[p]/gc[p] : null; };
+  // curva do time em foco: chance da zona se ELE terminar com k pontos; pontuações com poucas simulações ficam de fora
+  const minN = Math.max(50, N*0.0005), tc = p => res.ptsCnt[t*M+p];
+  const curve = k => { const PR = res.m[k].pts; return p => tc(p) >= minN ? PR[t*M+p]/tc(p) : null; };
   const C = Object.fromEntries(keys.map(k=>[k, curve(k)]));
   let lo = M, hi = 0;
   for (let p=0;p<M;p++){ if (keys.some(k=>{ const v = C[k](p); return v!=null && v>0.003 && v<0.997; }) || res.ptsCnt[t*M+p]/N>0.003){ lo=Math.min(lo,p); hi=Math.max(hi,p); } }
@@ -2160,9 +2173,9 @@ function renderCurves(){
   lo = Math.max(0,lo-1); hi = Math.min(M-1,hi+1);
   const labels = []; for (let p=lo;p<=hi;p++) labels.push(p);
   const name = {tit:'Título', lib:'Libertadores ('+posTxt(...zoneRange('lib'))+')', sula:'Sul-Americana ('+posTxt(...zoneRange('sula'))+')', z4:'Queda'};
-  const datasets = keys.map(k=>({type:'line', label:name[k], data:labels.map(p=>{ const v = C[k](p); return v==null ? null : +(v*100).toFixed(2); }),
+  const datasets = keys.filter(k=>labels.some(p=>{ const v = C[k](p); return v!=null && v>=0.001; })).map(k=>({type:'line', label:name[k], data:labels.map(p=>{ const v = C[k](p); return v==null ? null : +(v*100).toFixed(2); }),
     borderColor: css(MET[k].color), backgroundColor: css(MET[k].color), borderWidth: k===metric ? 3.5 : 1.75, pointRadius:0, pointHoverRadius:3, tension:.25, yAxisID:'y', spanGaps:true, order:1}));
-  datasets.push({type:'bar', label:'Pontuação final de '+TEAMS[t].n, data:labels.map(p=>+(res.ptsCnt[t*M+p]/N*100).toFixed(2)), backgroundColor: css('--c-meio'), borderRadius:2, yAxisID:'y1', maxBarThickness:18, order:2});
+  datasets.push({type:'bar', label:'Chance de '+TEAMS[t].n+' terminar com a pontuação', data:labels.map(p=>+(res.ptsCnt[t*M+p]/N*100).toFixed(2)), backgroundColor: css('--c-meio'), borderRadius:2, yAxisID:'y1', maxBarThickness:18, order:2});
   const options = {responsive:true, maintainAspectRatio:false, animation:false, interaction:{mode:'index',intersect:false},
     plugins:{legend:{position:'bottom',labels:{boxWidth:12}}, tooltip:{callbacks:{title:it=>it[0].label+' pontos', label:c=>c.dataset.label+': '+(c.parsed.y==null?'–':fmt1.format(c.parsed.y)+'%')}}},
     scales:{x:{title:{display:true,text:'Pontuação final'},grid:{display:false},border:{display:false}},
