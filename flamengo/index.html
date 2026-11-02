@@ -1880,7 +1880,34 @@ $('#metricSel').addEventListener('click', pickMetric);
 $('#tblMetric').addEventListener('click', pickMetric);
 /* um único time em foco: escolhido no topo (ou clicando na tabela); vale para a tabela, os jogos, a análise e o cartão,
    e fica guardado para a próxima visita */
+/* Contagem de cliques (GoatCounter). O contador só existe no site boladecristal.app.br (o site.js inclui o script);
+   aqui no Claude window.goatcounter não existe e nada é enviado. Nenhum dado de palpite é registrado, só o nome do botão. */
+const trackSent = new Set(), trackQueue = [];
+function track(name, once){
+  if (once){ if (trackSent.has(name)) return; trackSent.add(name); }
+  trackQueue.push(name); flushTrack();
+}
+let trackTries = 0;
+function flushTrack(){
+  const gc = window.goatcounter;
+  if (gc && typeof gc.count==='function'){ while (trackQueue.length){ const n = trackQueue.shift(); try { gc.count({path:'evento/'+n, title:n, event:true}); } catch(e){} } return; }
+  if (!document.querySelector('script[data-goatcounter]')){ trackQueue.length = 0; return; }   // página sem contador (Claude, testes)
+  if (trackTries++ < 20) setTimeout(flushTrack, 500);
+}
+document.addEventListener('click', e=>{
+  const el = e.target.closest('button, a'); if (!el) return;
+  const ids = {btnGenerateCard:'card/gerar', btnShareCard:'card/compartilhar', btnWhatsApp:'card/whatsapp', btnCopyScenarioLink:'card/copiar-link', btnDownloadCard:'card/baixar',
+    btnShareTop:'cenario/compartilhar', btnCopy:'cenario/copiar-codigo', btnLoad:'cenario/carregar', btnSave:'cenario/salvar', btnResetAll:'palpites/limpar-todos'};
+  if (ids[el.id]) return track(ids[el.id]);
+  if (el.id==='btnTheme') return track('tema/'+(document.documentElement.getAttribute('data-theme')==='dark' ? 'claro' : 'escuro'));
+  if (el.matches('#tblMetric button')) return track('tabela/'+el.dataset.m);
+  if (el.matches('#metricSel button')) return track('analise/'+el.dataset.m);
+  if (el.matches('#ptsTabs button')) return track('projecao/'+el.dataset.pv);
+  if (el.matches('#gMode button')) return track('jogos/'+el.dataset.gm);
+  if (el.matches('.views button')) return track('secao/'+el.dataset.view);
+}, true);
 function setFocus(i){
+  if (i!==focus) track('time/'+TEAMS[i].c);
   focus = i; $('#selTeam').value = String(i);
   if (PAGE_TEAM==null || i!==PAGE_TEAM){ myTeam = i; mySkipped = false; try { localStorage.setItem(MY_KEY, TEAMS[i].c); } catch(e){} }
   if (res) renderTable(); renderGames(); renderFocus(); renderMyCard();
@@ -2292,10 +2319,12 @@ $('#chkOthers').addEventListener('change', renderEvo);
 /* ---------- ciclo ---------- */
 let calcTimer = null;
 function changed(){
+  if (filled()) track('palpites/primeiro', true);
   save(); renderTabs(); renderGames(); $('#codeOut').value = curCode();
   clearTimeout(calcTimer); calcTimer = setTimeout(startJob, 40);
 }
 function softChanged(){
+  if (filled()) track('palpites/primeiro', true);
   save(); renderTabs(); $('#codeOut').value = curCode();
   clearTimeout(calcTimer); calcTimer = setTimeout(startJob, 250);
 }
@@ -2490,6 +2519,7 @@ renderPrec(); renderMethod();
 { const last = zoneFromPos(HIST[HIST.length-1].pos, metric==='tit'?'tit':'z4'); let best = 0; for (let u=1;u<NT;u++) if (Math.abs(last[u]-0.5) < Math.abs(last[best]-0.5)) best = u;
   focus = PAGE_TEAM!=null ? PAGE_TEAM : myTeam!=null ? myTeam : best; }
 const sharedAtStart=readSharedScenario();
+if (sharedAtStart && !sharedAtStart.invalid) track('cenario/link-aberto');
 if(sharedAtStart){
   const imported=useSharedScenario(sharedAtStart);
   $('#migrMsg').hidden=false;
@@ -2522,4 +2552,5 @@ initDb();
 
 </script>
 
+<script data-goatcounter="https://henriquef16.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body></html>
