@@ -511,9 +511,9 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
         <span class="muted focus-hint">Troque o time no topo da página ou clicando na tabela.</span>
         <div class="seg3 metric" role="group" aria-label="O que analisar" id="metricSel">
           <button type="button" data-m="z4" aria-pressed="true">Rebaixamento</button>
-          <button type="button" data-m="tit" aria-pressed="false">Título</button>
-          <button type="button" data-m="lib" aria-pressed="false">Libertadores</button>
           <button type="button" data-m="sula" aria-pressed="false">Sul-Americana</button>
+          <button type="button" data-m="lib" aria-pressed="false">Libertadores</button>
+          <button type="button" data-m="tit" aria-pressed="false">Título</button>
         </div>
       </div>
       <div class="bigbox"><div class="bignum num" id="bigPct">–</div><div class="muted biglbl" id="bigLbl">chance de rebaixamento</div><div class="muted bigsub" id="bigSub" hidden></div></div>
@@ -549,8 +549,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
         <div class="pv" id="pvPts" hidden>
           <span class="kpi-lbl" id="kpiLbl">Pontos de corte</span>
           <div class="kpis" id="kpis"></div>
-          <div class="ptsrow ptshead"><span>Pts</span><span>Onde termina quem chega a essa pontuação</span><span id="ptsTeamHead"></span></div>
-          <div class="allbars" id="ptsBars"></div>
+          <div class="chartbox"><canvas id="chByPts" aria-label="Onde terminam os times em cada pontuação final"></canvas></div>
           <div class="zoneleg" id="ptsLeg"></div>
         </div>
         <div class="pv" id="pvAll" hidden>
@@ -603,12 +602,12 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
 
       <section class="step"><span class="stepn">3</span><div>
         <h2>Analise um time</h2>
-        <p>O painel <b>Time em foco</b> analisa o time escolhido no topo. Escolha o que quer ver: <b>Rebaixamento</b>, <b>Título</b>, <b>Libertadores</b> ou <b>Sul-Americana</b>. Todo o painel muda junto:</p>
+        <p>O painel <b>Time em foco</b> analisa o time escolhido no topo. Escolha o que quer ver: <b>Rebaixamento</b>, <b>Sul-Americana</b>, <b>Libertadores</b> ou <b>Título</b>. Todo o painel muda junto:</p>
         <ul>
           <li><b>Número grande</b>: a chance do time, com o erro numérico da simulação (o ± mede só o efeito de simular um número finito de campeonatos, não toda a incerteza da previsão).</li>
           <li><b>Evolução rodada a rodada</b>: como a chance mudou ao longo do campeonato. A linha tracejada é o seu cenário, com um ponto por rodada que você preencher inteira.</li>
           <li><b>Jogos decisivos</b>: a chance do time em cada resultado de cada jogo da rodada. As colunas não somam 100%; cada uma responde "e se esse resultado acontecer?". O <b>impacto</b> mostra os jogos que mais mexem com o time.</li>
-          <li><b>Classificação final projetada</b>, em três abas. <b>Time em foco</b>: a chance de terminar em cada posição, do 1º ao 20º, nas cores das zonas, e a soma por zona (título, Libertadores, pré-Libertadores, Sul-Americana, meio da tabela e queda), que dá 100%. <b>Por pontuação</b>: uma faixa por pontuação final, com a divisão por zona de todos os times que chegam a ela, a chance do time em foco terminar com cada pontuação e os pontos de corte, por exemplo quantos pontos deixam o risco de queda abaixo de 1%. <b>Todos os times</b>: a soma por zona dos 20 clubes, um embaixo do outro.</li>
+          <li><b>Classificação final projetada</b>, em três abas. <b>Time em foco</b>: a chance de terminar em cada posição, do 1º ao 20º, nas cores das zonas, e a soma por zona (título, Libertadores, pré-Libertadores, Sul-Americana, meio da tabela e queda), que dá 100%. <b>Por pontuação</b>: uma coluna por pontuação final, com a divisão por zona de todos os times que chegam a ela, um colchete com a faixa provável do time em foco e os pontos de corte, por exemplo quantos pontos deixam o risco de queda abaixo de 1%. <b>Todos os times</b>: a soma por zona dos 20 clubes, um embaixo do outro.</li>
         </ul>
       </div></section>
 
@@ -2150,7 +2149,7 @@ const PV_KEY = 'bc-pv'; let ptsView = 'team';
 try { const v = localStorage.getItem(PV_KEY); if (v==='team'||v==='pts'||v==='all') ptsView = v; } catch(e){}
 const PV_NOTES = {
   team: 'Barras: chance de o time em foco terminar em cada posição, nas cores da zona. A faixa abaixo soma as posições de cada zona e dá 100%. Com palpites, as barras vazadas mostram o cenário sem palpites.',
-  pts: 'Cada linha é uma pontuação final, de cima para baixo, com a divisão por zona de todos os times que terminaram com ela em todas as simulações (soma 100%). Como quem chega a cada pontuação muda de simulação para simulação, a divisão pode oscilar de uma linha para a outra nas pontas, onde poucos times conseguem chegar. À direita, a chance de o time em foco terminar com aquela pontuação; as linhas mais prováveis ficam destacadas. Os pontos de corte acima seguem a mesma conta, para o objetivo escolhido no painel; com palpites, os que mudarem ficam destacados com o valor sem palpites.',
+  pts: 'Cada coluna é uma pontuação final, com a divisão por zona de todos os times que terminaram com ela em todas as simulações (soma 100%). Como quem chega a cada pontuação muda de simulação para simulação, a divisão pode oscilar de uma coluna para a outra nas pontas, onde poucos times conseguem chegar. O colchete embaixo marca onde o time em foco termina em 80% das simulações; passe o mouse ou o dedo numa coluna para ver os números e a chance do time terminar com aquela pontuação. Os pontos de corte acima seguem a mesma conta, para o objetivo escolhido no painel; com palpites, os que mudarem ficam destacados com o valor sem palpites.',
   all: 'Cada linha é um time, na ordem da tabela atual, com a chance de terminar em cada zona (soma 100%). Clique num time para analisá-lo.'
 };
 function renderPtsTabs(){
@@ -2183,6 +2182,7 @@ function renderPoints(){
   $('#zoneLeg').innerHTML = zoneLegHTML(segs, 'all');
 }
 /* Por pontuação: para cada pontuação final, onde terminam os times que chegam a ela (todos os times, todas as simulações) */
+let chByPts = null;
 function renderCurves(){
   renderKpis();
   const M = res.MAXP, N = res.sims, t = focus, cnt = new Float64Array(M), Z = {};
@@ -2191,18 +2191,31 @@ function renderCurves(){
   const minN = Math.max(50, N*0.0005), names = zoneSegments().map(z=>z[0]), cols = zoneSegments().map(z=>css(z[3]));
   const segsAt = p => { const c = cnt[p], tit = Z.tit[p]/c, ld = Z.libd[p]/c, l = Z.lib[p]/c, su = Z.sula[p]/c, q = Z.z4[p]/c;
     const v = [tit, Math.max(ld-tit,0), Math.max(l-ld,0), su, Math.max(1-l-su-q,0), q]; return names.map((n,i)=>({n, v:v[i], col:cols[i]})); };
-  let ps = []; for (let p=M-1;p>=0;p--) if (cnt[p]>=minN) ps.push(p);
-  // corta as pontas repetidas: só uma linha de "título garantido" no topo e uma de "queda certa" embaixo
-  while (ps.length>2 && segsAt(ps[1])[0].v>=0.995) ps.shift();
-  while (ps.length>2 && segsAt(ps[ps.length-2])[5].v>=0.995) ps.pop();
-  $('#ptsTeamHead').textContent = TEAMS[t].c;
-  // pontuações seguidas em que uma zona tem 99,5% ou mais viram uma linha só (por exemplo, 67 a 76)
-  const rows = [];
-  ps.forEach(p=>{ const segs = segsAt(p), dom = segs.findIndex(x=>x.v>=0.995), tp = res.ptsCnt[t*M+p]/N, last = rows[rows.length-1];
-    if (dom>=0 && last && last.dom===dom){ last.lo = p; last.tp += tp; } else rows.push({hi:p, lo:p, dom, segs, tp}); });
-  $('#ptsBars').innerHTML = rows.map(r=>{ const lbl = r.hi===r.lo ? String(r.hi) : r.lo+'–'+r.hi;
-    return '<div class="ptsrow'+(r.tp>=0.05?' hot':'')+'" role="img" aria-label="'+lbl+' pontos: '+r.segs.filter(x=>x.v>=0.0005).map(x=>x.n+' '+pctTxt(x.v)).join(', ')+'">'+
-      '<span class="pp num">'+lbl+'</span><span class="zonebar">'+zoneBarHTML(r.segs, 0.12)+'</span><span class="tp num">'+(r.tp>=0.005?fmt0.format(Math.round(r.tp*100))+'%':'')+'</span></div>'; }).join('');
+  let ps = []; for (let p=0;p<M;p++) if (cnt[p]>=minN) ps.push(p);
+  // corta as pontas repetidas: só uma coluna de "queda certa" à esquerda e uma de "título certo" à direita
+  while (ps.length>2 && segsAt(ps[1])[5].v>=0.995) ps.shift();
+  while (ps.length>2 && segsAt(ps[ps.length-2])[0].v>=0.995) ps.pop();
+  const labels = ps.map(String), SG = ps.map(segsAt);
+  // faixa provável do time em foco (80% das simulações) para o colchete embaixo do eixo
+  let acc = 0, lo = null, hi = null; for (let p=0;p<M;p++){ acc += res.ptsCnt[t*M+p]/N; if (lo==null && acc>=0.1) lo = p; if (hi==null && acc>=0.9){ hi = p; break; } }
+  const bracket = {id:'teamRange', afterDraw(ch){
+    if (lo==null || hi==null) return;
+    const i0 = ps.findIndex(p=>p>=lo), i1 = ps.length-1-[...ps].reverse().findIndex(p=>p<=hi); if (i0<0 || i1<i0) return;
+    const x = ch.scales.x, step = ps.length>1 ? x.getPixelForValue(1)-x.getPixelForValue(0) : 20;
+    const a = x.getPixelForValue(i0)-step/2, b = x.getPixelForValue(i1)+step/2, yy = ch.chartArea.bottom+30, c = ch.ctx;
+    c.save(); c.strokeStyle = css('--ink'); c.lineWidth = 2; c.beginPath(); c.moveTo(a,yy-6); c.lineTo(a,yy); c.lineTo(b,yy); c.lineTo(b,yy-6); c.stroke();
+    c.fillStyle = css('--ink'); c.font = '600 12px '+css('--f-detail'); c.textAlign = 'center';
+    c.fillText(TEAMS[t].n+': '+(lo===hi ? lo : lo+' a '+hi)+' pts', Math.min(Math.max((a+b)/2, ch.chartArea.left+70), ch.chartArea.right-70), yy+16); c.restore(); }};
+  const datasets = names.map((n,i)=>({label:n, data:SG.map(sg=>+(sg[i].v*100).toFixed(2)), backgroundColor:cols[i], barPercentage:1, categoryPercentage:.9, stack:'z'}))
+    .filter(ds=>ds.data.some(v=>v>0));
+  const options = {responsive:true, maintainAspectRatio:false, animation:false, layout:{padding:{bottom:34}}, interaction:{mode:'index',intersect:false},
+    plugins:{legend:{display:false}, tooltip:{filter:it=>it.parsed.y>=0.05, callbacks:{title:it=>it[0].label+' pontos',
+      label:c=>c.dataset.label+': '+fmt1.format(c.parsed.y)+'%',
+      footer:it=>{ const p = +it[0].label, v = res.ptsCnt[t*M+p]/N; return 'Chance de '+TEAMS[t].n+' terminar com '+p+': '+pctTxt(v); }}}},
+    scales:{x:{stacked:true, grid:{display:false}, border:{display:false}, ticks:{autoSkip:true, maxRotation:0, font:{size:10}}},
+      y:{stacked:true, min:0, max:100, ticks:{callback:v=>v+'%'}, grid:{display:false}, border:{display:false}}}};
+  if (chByPts) chByPts.destroy();
+  chByPts = new Chart($('#chByPts'), {type:'bar', data:{labels, datasets}, options, plugins:[bracket]});
   $('#ptsLeg').innerHTML = zoneLegHTML(zoneSegments().filter(([,a,b])=>a<=b).map(([n,,,c])=>({n, v:1, col:css(c)})), 'names');
 }
 /* Todos os times: uma faixa de 100% por time, na ordem da tabela */
