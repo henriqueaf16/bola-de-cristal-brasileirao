@@ -100,6 +100,9 @@ a{color:var(--moss);text-underline-offset:2px}
 .rowbtns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 
 .grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:22px;align-items:start}
+.grid.notable{grid-template-columns:minmax(0,1fr)}
+.grid.notable #tblPanel{display:none}
+#btnHideTbl[aria-pressed="true"]{background:var(--moss);color:var(--on-moss)}
 @media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
 .panel{background:var(--surface);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:12px;min-width:0}
 .panel-head{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;justify-content:space-between}
@@ -465,8 +468,8 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
   </details>
   <div class="toast" id="migrMsg" aria-live="polite" hidden></div>
 
-  <div class="grid">
-    <section class="panel" aria-labelledby="hTabela">
+  <div class="grid" id="mainGrid">
+    <section class="panel" aria-labelledby="hTabela" id="tblPanel">
       <div class="panel-head">
         <h2 id="hTabela">Chance de queda por time</h2>
         <div class="seg3" role="group" aria-label="O que mostrar na tabela" id="tblMetric">
@@ -487,7 +490,10 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
     <section class="panel" aria-labelledby="hJogos">
       <div class="panel-head">
         <h2 id="hJogos">Lance os resultados</h2>
-        <button class="btn" id="btnClearRound" type="button">Limpar rodada</button>
+        <div class="rowbtns">
+          <button class="btn" id="btnHideTbl" type="button" aria-pressed="false" aria-controls="tblPanel" title="Palpite sem ver a classificação">Esconder tabela</button>
+          <button class="btn" id="btnClearRound" type="button">Limpar rodada</button>
+        </div>
       </div>
       <div class="gview">
         <div class="seg3" role="group" aria-label="Como listar os jogos" id="gMode">
@@ -597,6 +603,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
         <h2>Lance seus palpites</h2>
         <p>No quadro <b>Lance os resultados</b>, escolha a rodada nas abas e digite o placar nos dois campos de cada jogo, como numa tabela de rodada. As abas vão da 1ª à 38ª rodada: nas rodadas encerradas aparecem os placares reais, só para consulta. Para ver de uma vez todos os jogos que faltam para um clube, troque para <b>Jogos do time em foco</b>; a lista mostra a rodada, a data e se o jogo é em casa ou fora. Para desfazer, apague os dois campos. O placar conta nos pontos, nas vitórias e no saldo de gols.</p>
         <p>Embaixo de cada jogo aparecem as chances que o modelo dá a cada resultado e os gols esperados, para você comparar com o seu palpite.</p>
+        <p>Prefere palpitar sem olhar a classificação? O botão <b>Esconder tabela</b>, no quadro dos jogos, tira a tabela da tela e deixa os jogos ocupando a largura toda; clique de novo em <b>Mostrar tabela</b> para trazê-la de volta. A escolha fica guardada no navegador.</p>
         <p class="note">Depois de cada palpite, a tabela recalcula sozinha. A coluna <b>Δ</b> mostra quanto a chance de cada time mudou em relação ao cenário sem palpites, e o painel do time em foco mostra a pontuação final provável com e sem os seus palpites.</p>
       </div></section>
 
@@ -1792,6 +1799,15 @@ $('#games').addEventListener('input', e=>{
   else { hint.textContent = ''; if (scH[i]===x && scA[i]===y) return; scH[i]=x; scA[i]=y; choice[i]=outcomeOf(x,y); } card.classList.toggle('filled', !!choice[i]); const lg = card.querySelector('.legacy'); if (lg) lg.remove();
   softChanged();
 });
+/* palpitar sem ver a tabela: esconde a classificação e os jogos ocupam a largura toda; a escolha fica guardada */
+const NOTBL_KEY = 'bc-sem-tabela';
+function setHideTable(on){
+  $('#mainGrid').classList.toggle('notable', on);
+  $('#btnHideTbl').setAttribute('aria-pressed', String(on)); $('#btnHideTbl').textContent = on ? 'Mostrar tabela' : 'Esconder tabela';
+  try { localStorage.setItem(NOTBL_KEY, on ? '1' : '0'); } catch(e){}
+}
+try { if (localStorage.getItem(NOTBL_KEY)==='1') setHideTable(true); } catch(e){}
+$('#btnHideTbl').addEventListener('click', ()=>{ const on = !$('#mainGrid').classList.contains('notable'); setHideTable(on); track('tabela/'+(on?'esconder':'mostrar')); });
 $('#btnClearRound').addEventListener('click', ()=>{ listedGames().forEach(x=>{ choice[x.i]=0; clearScore(x.i); }); changed(); });
 let resetArmed = false;
 $('#btnResetAll').addEventListener('click', ()=>{
