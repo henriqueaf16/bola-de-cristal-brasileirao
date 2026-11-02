@@ -180,6 +180,20 @@ tr.inz4 td.pos{color:var(--z4)}
 .mycard .mc-team{display:flex;flex-direction:column;gap:2px;min-width:180px}
 .mycard .mc-lbl{font-family:var(--f-detail);font-weight:600;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .mycard .mc-name{font-size:1.5rem;font-weight:700;line-height:1.15}
+.mycard .mc-body{display:contents}
+.mycard .mc-pick{display:flex;align-items:center;gap:10px}
+.mycard .mc-select{font:inherit;font-size:1.35rem;font-weight:700;padding:4px 12px;border-radius:999px;background:var(--surface-2);color:var(--ink);border:0;max-width:100%}
+.focus-name{font-size:1.5rem;display:flex;align-items:center;gap:10px}
+.focus-hint{font-family:var(--f-detail);font-size:.78rem}
+.ptsrow{display:grid;grid-template-columns:3.8em minmax(0,1fr) 3.8em;align-items:center;gap:8px;font-size:.82rem;padding:1px 4px}
+.ptsrow .pp{font-weight:700;text-align:right}
+.ptsrow .zonebar{height:16px;border-radius:4px}
+.ptsrow .zonebar div{font-size:.64rem}
+.ptsrow .tp{font-family:var(--f-detail);font-size:.74rem;color:var(--muted);text-align:right}
+.ptsrow.hot .tp{color:var(--ink);font-weight:600}
+.ptsrow.hot{background:var(--surface-2);border-radius:6px}
+.ptshead{font-family:var(--f-detail);font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.ptshead span:first-child,.ptshead span:last-child{text-align:right}
 .mycard .mc-act{font-family:var(--f-detail);font-size:.82rem;color:var(--muted)}
 .mycard .linkbtn{color:var(--moss);min-height:32px}
 .mycard .mc-mets{display:flex;flex-wrap:wrap;gap:12px 36px}
@@ -413,7 +427,14 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
   </header>
 
   <div id="viewSim" style="display:flex;flex-direction:column;gap:22px">
-  <section class="mycard" id="myCard" aria-label="Seu time" hidden></section>
+  <section class="mycard" id="myCard" aria-label="Time em foco">
+    <div class="mc-team">
+      <label class="mc-lbl" for="selTeam">Time em foco</label>
+      <div class="mc-pick"><span id="mcDot"></span><select id="selTeam" class="mc-select"></select></div>
+      <span class="mc-act">vale para a tabela, os jogos e a análise · <button class="linkbtn" type="button" data-mc="go">ver análise</button></span>
+    </div>
+    <div class="mc-body" id="mcBody"></div>
+  </section>
   <div class="toolbar">
     <details class="adv"><summary>Opções avançadas</summary>
     <div class="prec">
@@ -471,9 +492,8 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
       <div class="gview">
         <div class="seg3" role="group" aria-label="Como listar os jogos" id="gMode">
           <button type="button" data-gm="round" aria-pressed="true">Por rodada</button>
-          <button type="button" data-gm="team" aria-pressed="false">Jogos de um time</button>
+          <button type="button" data-gm="team" aria-pressed="false">Jogos do time em foco</button>
         </div>
-        <label for="selGTeam" class="tsum" id="gTeamWrap" hidden>Time <select id="selGTeam"></select></label>
         <span class="tsum num" id="gTeamSum" hidden></span>
       </div>
       <div class="tabs" role="tablist" id="tabs"></div>
@@ -487,8 +507,8 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
     <div class="focus-head">
       <div style="display:flex;flex-direction:column;gap:6px">
         <span class="eyebrow" id="hFoco">Time em foco</span>
-        <label class="muted" for="selFocus" style="font-size:.82rem;font-family:var(--f-detail)">Escolha o time</label>
-        <select id="selFocus"></select>
+        <h2 class="focus-name" id="focusName"></h2>
+        <span class="muted focus-hint">Troque o time no topo da página ou clicando na tabela.</span>
         <div class="seg3 metric" role="group" aria-label="O que analisar" id="metricSel">
           <button type="button" data-m="z4" aria-pressed="true">Rebaixamento</button>
           <button type="button" data-m="tit" aria-pressed="false">Título</button>
@@ -529,7 +549,9 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
         <div class="pv" id="pvPts" hidden>
           <span class="kpi-lbl" id="kpiLbl">Pontos de corte</span>
           <div class="kpis" id="kpis"></div>
-          <div class="chartbox"><canvas id="chCurve" aria-label="Chance de cada zona por pontuação final"></canvas></div>
+          <div class="ptsrow ptshead"><span>Pts</span><span>Onde termina quem chega a essa pontuação</span><span id="ptsTeamHead"></span></div>
+          <div class="allbars" id="ptsBars"></div>
+          <div class="zoneleg" id="ptsLeg"></div>
         </div>
         <div class="pv" id="pvAll" hidden>
           <div class="allbars" id="allBars"></div>
@@ -569,24 +591,24 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
 
       <section class="step"><span class="stepn">1</span><div>
         <h2>Leia a tabela</h2>
-        <p>No topo fica o cartão do <b>seu time</b>, escolhido na primeira visita (dá para trocar em "trocar time"), com as chances dele e quanto elas mudaram desde a última atualização. Na aba <b>Simulador</b>, a tabela mostra a classificação e, nas abas acima dela, a chance de cada time de ser campeão, ir à Libertadores, ir à Sul-Americana ou cair. A faixa colorida ao lado da posição indica a zona em que o time está hoje. <b>Proj.</b> é a pontuação final média esperada.</p>
+        <p>No topo fica o cartão do <b>time em foco</b>, escolhido na primeira visita, com as chances dele e quanto elas mudaram desde a última atualização. É o único lugar para trocar de time (ou clique num time da tabela): a escolha vale para a tabela, os jogos e a análise, e fica guardada para a próxima visita. Na aba <b>Simulador</b>, a tabela mostra a classificação e, nas abas acima dela, a chance de cada time de ser campeão, ir à Libertadores, ir à Sul-Americana ou cair. A faixa colorida ao lado da posição indica a zona em que o time está hoje. <b>Proj.</b> é a pontuação final média esperada.</p>
       </div></section>
 
       <section class="step"><span class="stepn">2</span><div>
         <h2>Lance seus palpites</h2>
-        <p>No quadro <b>Lance os resultados</b>, escolha a rodada nas abas e digite o placar nos dois campos de cada jogo, como numa tabela de rodada. As abas vão da 1ª à 38ª rodada: nas rodadas encerradas aparecem os placares reais, só para consulta. Para ver de uma vez todos os jogos que faltam para um clube, troque para <b>Jogos de um time</b> e escolha o time; a lista mostra a rodada, a data e se o jogo é em casa ou fora. Para desfazer, apague os dois campos. O placar conta nos pontos, nas vitórias e no saldo de gols.</p>
+        <p>No quadro <b>Lance os resultados</b>, escolha a rodada nas abas e digite o placar nos dois campos de cada jogo, como numa tabela de rodada. As abas vão da 1ª à 38ª rodada: nas rodadas encerradas aparecem os placares reais, só para consulta. Para ver de uma vez todos os jogos que faltam para um clube, troque para <b>Jogos do time em foco</b>; a lista mostra a rodada, a data e se o jogo é em casa ou fora. Para desfazer, apague os dois campos. O placar conta nos pontos, nas vitórias e no saldo de gols.</p>
         <p>Embaixo de cada jogo aparecem as chances que o modelo dá a cada resultado e os gols esperados, para você comparar com o seu palpite.</p>
         <p class="note">Depois de cada palpite, a tabela recalcula sozinha. A coluna <b>Δ</b> mostra quanto a chance de cada time mudou em relação ao cenário sem palpites, e o painel do time em foco mostra a pontuação final provável com e sem os seus palpites.</p>
       </div></section>
 
       <section class="step"><span class="stepn">3</span><div>
         <h2>Analise um time</h2>
-        <p>Clique num time da tabela ou escolha no seletor do painel <b>Time em foco</b>. Depois escolha o que quer ver: <b>Rebaixamento</b>, <b>Título</b>, <b>Libertadores</b> ou <b>Sul-Americana</b>. Todo o painel muda junto:</p>
+        <p>O painel <b>Time em foco</b> analisa o time escolhido no topo. Escolha o que quer ver: <b>Rebaixamento</b>, <b>Título</b>, <b>Libertadores</b> ou <b>Sul-Americana</b>. Todo o painel muda junto:</p>
         <ul>
           <li><b>Número grande</b>: a chance do time, com o erro numérico da simulação (o ± mede só o efeito de simular um número finito de campeonatos, não toda a incerteza da previsão).</li>
           <li><b>Evolução rodada a rodada</b>: como a chance mudou ao longo do campeonato. A linha tracejada é o seu cenário, com um ponto por rodada que você preencher inteira.</li>
           <li><b>Jogos decisivos</b>: a chance do time em cada resultado de cada jogo da rodada. As colunas não somam 100%; cada uma responde "e se esse resultado acontecer?". O <b>impacto</b> mostra os jogos que mais mexem com o time.</li>
-          <li><b>Classificação final projetada</b>, em três abas. <b>Time em foco</b>: a chance de terminar em cada posição, do 1º ao 20º, nas cores das zonas, e a soma por zona (título, Libertadores, pré-Libertadores, Sul-Americana, meio da tabela e queda), que dá 100%. <b>Por pontuação</b>: a chance de cada zona para quem chega a cada pontuação final, com os pontos de corte, por exemplo quantos pontos deixam o risco de queda abaixo de 1%. <b>Todos os times</b>: a soma por zona dos 20 clubes, um embaixo do outro.</li>
+          <li><b>Classificação final projetada</b>, em três abas. <b>Time em foco</b>: a chance de terminar em cada posição, do 1º ao 20º, nas cores das zonas, e a soma por zona (título, Libertadores, pré-Libertadores, Sul-Americana, meio da tabela e queda), que dá 100%. <b>Por pontuação</b>: uma faixa por pontuação final, com a divisão por zona de todos os times que chegam a ela, a chance do time em foco terminar com cada pontuação e os pontos de corte, por exemplo quantos pontos deixam o risco de queda abaixo de 1%. <b>Todos os times</b>: a soma por zona dos 20 clubes, um embaixo do outro.</li>
         </ul>
       </div></section>
 
@@ -1710,11 +1732,10 @@ function listedGames(){ return gMode==='team' ? teamGames(focus) : roundGames(cu
 function renderGamesHead(){
   const team = gMode==='team';
   document.querySelectorAll('#gMode button').forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.gm===gMode)));
-  $('#tabs').hidden = team; $('#gTeamWrap').hidden = !team; $('#gTeamSum').hidden = !team;
+  $('#tabs').hidden = team; $('#gTeamSum').hidden = !team;
   if (team){
-    $('#selGTeam').value = String(focus);
     const gs = teamGames(focus), f = gs.filter(x=>choice[x.i]).length, home = gs.filter(x=>x.g.h===focus).length;
-    $('#gTeamSum').textContent = gs.length+' jogos restantes · '+home+' em casa, '+(gs.length-home)+' fora · '+f+' com palpite';
+    $('#gTeamSum').textContent = TEAMS[focus].n+': '+gs.length+' jogos restantes · '+home+' em casa, '+(gs.length-home)+' fora · '+f+' com palpite';
     $('#btnClearRound').textContent = 'Limpar jogos do time';
   } else $('#btnClearRound').textContent = 'Limpar rodada';
   $('#btnClearRound').hidden = !team && !roundGames(curRound).length;
@@ -1724,7 +1745,6 @@ $('#gMode').addEventListener('click', e=>{
   gMode = b.dataset.gm; try{ localStorage.setItem(GM_KEY, gMode); }catch(err){}
   renderGames();
 });
-$('#selGTeam').addEventListener('change', e=>setFocus(+e.target.value));
 function renderGames(){
   renderGamesHead();
   const team = gMode==='team';
@@ -1821,7 +1841,7 @@ function renderMetricToggle(){
   $('#hTabela').textContent = MET_TITLE[metric][0]; $('#thMet').textContent = MET_TITLE[metric][1];
   $('#hDec').textContent = 'Jogos decisivos';
   const D = MET[metric];
-  $('#kpiLbl').textContent = 'Pontos de corte do campeonato · '+D.noun;
+  $('#kpiLbl').textContent = 'Pontos de corte · '+D.noun;
   if (typeof renderPtsTabs==='function' && $('#ptsTabs')) renderPtsTabs();
 }
 function renderVagas(){
@@ -1858,14 +1878,19 @@ function pickMetric(e){
 }
 $('#metricSel').addEventListener('click', pickMetric);
 $('#tblMetric').addEventListener('click', pickMetric);
-function setFocus(i){ focus = i; $('#selFocus').value = String(i); if (res) renderTable(); renderGames(); renderFocus(); }
-function fillSelect(){
-  $('#selFocus').innerHTML = TEAMS.map((t,i)=>({t,i})).sort((a,b)=>a.t.n.localeCompare(b.t.n,'pt-BR'))
-    .map(x=>'<option value="'+x.i+'">'+x.t.n+'</option>').join('');
-  $('#selFocus').value = String(focus);
-  $('#selGTeam').innerHTML = $('#selFocus').innerHTML; $('#selGTeam').value = String(focus);
+/* um único time em foco: escolhido no topo (ou clicando na tabela); vale para a tabela, os jogos, a análise e o cartão,
+   e fica guardado para a próxima visita */
+function setFocus(i){
+  focus = i; $('#selTeam').value = String(i);
+  if (PAGE_TEAM==null || i!==PAGE_TEAM){ myTeam = i; mySkipped = false; try { localStorage.setItem(MY_KEY, TEAMS[i].c); } catch(e){} }
+  if (res) renderTable(); renderGames(); renderFocus(); renderMyCard();
 }
-$('#selFocus').addEventListener('change', e=>setFocus(+e.target.value));
+function fillSelect(){
+  $('#selTeam').innerHTML = TEAMS.map((t,i)=>({t,i})).sort((a,b)=>a.t.n.localeCompare(b.t.n,'pt-BR'))
+    .map(x=>'<option value="'+x.i+'">'+x.t.n+'</option>').join('');
+  $('#selTeam').value = String(focus);
+}
+$('#selTeam').addEventListener('change', e=>setFocus(+e.target.value));
 /* Pontuação final do time: mediana e faixa central de 80% (percentis 10 e 90) das simulações. */
 function ptsStats(t, r){
   r = r || res;
@@ -1874,6 +1899,7 @@ function ptsStats(t, r){
   return {med, lo, hi};
 }
 function renderFocus(){
+  $('#focusName').innerHTML = clubDot(TEAMS[focus])+TEAMS[focus].n;
   if (!res) return;
   const t = focus, D = MET[metric], p = D.prob(res)[t], se = D.se(res)[t];
   const st = buildState(choice,null,scH,scA);
@@ -2124,7 +2150,7 @@ const PV_KEY = 'bc-pv'; let ptsView = 'team';
 try { const v = localStorage.getItem(PV_KEY); if (v==='team'||v==='pts'||v==='all') ptsView = v; } catch(e){}
 const PV_NOTES = {
   team: 'Barras: chance de o time em foco terminar em cada posição, nas cores da zona. A faixa abaixo soma as posições de cada zona e dá 100%. Com palpites, as barras vazadas mostram o cenário sem palpites.',
-  pts: 'Linhas: se o time em foco terminar com aquela pontuação, qual a chance de cada zona; a linha mais grossa é o objetivo escolhido no painel. Pontuações que aparecem em poucas simulações ficam de fora, para não mostrar ruído. Barras claras: chance de o time terminar com cada pontuação. Os pontos de corte acima são do campeonato: para cada pontuação, somam-se todos os times de todas as simulações. Com palpites, os que mudarem ficam destacados com o valor sem palpites. A maior ou menor pontuação vista nas simulações não é um limite matemático.',
+  pts: 'Cada linha é uma pontuação final, de cima para baixo, com a divisão por zona de todos os times que terminaram com ela em todas as simulações (soma 100%). Como quem chega a cada pontuação muda de simulação para simulação, a divisão pode oscilar de uma linha para a outra nas pontas, onde poucos times conseguem chegar. À direita, a chance de o time em foco terminar com aquela pontuação; as linhas mais prováveis ficam destacadas. Os pontos de corte acima seguem a mesma conta, para o objetivo escolhido no painel; com palpites, os que mudarem ficam destacados com o valor sem palpites.',
   all: 'Cada linha é um time, na ordem da tabela atual, com a chance de terminar em cada zona (soma 100%). Clique num time para analisá-lo.'
 };
 function renderPtsTabs(){
@@ -2134,7 +2160,6 @@ function renderPtsTabs(){
 }
 $('#ptsTabs').addEventListener('click', e=>{ const b = e.target.closest('button[data-pv]'); if (!b || b.dataset.pv===ptsView) return;
   ptsView = b.dataset.pv; try { localStorage.setItem(PV_KEY, ptsView); } catch(e){} renderPoints(); });
-let chCurve = null;
 function renderPoints(){
   renderPtsTabs();
   if (!window.Chart || !res) return;
@@ -2157,32 +2182,28 @@ function renderPoints(){
   $('#zoneBar').setAttribute('aria-label', TEAMS[t].n+': '+segs.filter(x=>x.v>=0.0005).map(x=>x.n+' '+pctTxt(x.v)).join(', '));
   $('#zoneLeg').innerHTML = zoneLegHTML(segs, 'all');
 }
-/* Por pontuação: chance de cada zona para quem termina com k pontos (todos os times, todas as simulações) */
+/* Por pontuação: para cada pontuação final, onde terminam os times que chegam a ela (todos os times, todas as simulações) */
 function renderCurves(){
   renderKpis();
-  const M = res.MAXP, N = res.sims, t = focus, gc = new Float64Array(M);
-  for (let u=0;u<NT;u++) for (let p=0;p<M;p++) gc[p] += res.ptsCnt[u*M+p];
-  const keys = ['tit','lib','sula','z4'].filter(k=>{ if (k!=='lib' && k!=='sula') return true; const [a,b] = zoneRange(k); return a<=b; });
-  // curva do time em foco: chance da zona se ELE terminar com k pontos; pontuações com poucas simulações ficam de fora
-  const minN = Math.max(50, N*0.0005), tc = p => res.ptsCnt[t*M+p];
-  const curve = k => { const PR = res.m[k].pts; return p => tc(p) >= minN ? PR[t*M+p]/tc(p) : null; };
-  const C = Object.fromEntries(keys.map(k=>[k, curve(k)]));
-  let lo = M, hi = 0;
-  for (let p=0;p<M;p++){ if (keys.some(k=>{ const v = C[k](p); return v!=null && v>0.003 && v<0.997; }) || res.ptsCnt[t*M+p]/N>0.003){ lo=Math.min(lo,p); hi=Math.max(hi,p); } }
-  if (lo>hi){ lo=30; hi=70; }
-  lo = Math.max(0,lo-1); hi = Math.min(M-1,hi+1);
-  const labels = []; for (let p=lo;p<=hi;p++) labels.push(p);
-  const name = {tit:'Título', lib:'Libertadores ('+posTxt(...zoneRange('lib'))+')', sula:'Sul-Americana ('+posTxt(...zoneRange('sula'))+')', z4:'Queda'};
-  const datasets = keys.filter(k=>labels.some(p=>{ const v = C[k](p); return v!=null && v>=0.001; })).map(k=>({type:'line', label:name[k], data:labels.map(p=>{ const v = C[k](p); return v==null ? null : +(v*100).toFixed(2); }),
-    borderColor: css(MET[k].color), backgroundColor: css(MET[k].color), borderWidth: k===metric ? 3.5 : 1.75, pointRadius:0, pointHoverRadius:3, tension:.25, yAxisID:'y', spanGaps:true, order:1}));
-  datasets.push({type:'bar', label:'Chance de '+TEAMS[t].n+' terminar com a pontuação', data:labels.map(p=>+(res.ptsCnt[t*M+p]/N*100).toFixed(2)), backgroundColor: css('--c-meio'), borderRadius:2, yAxisID:'y1', maxBarThickness:18, order:2});
-  const options = {responsive:true, maintainAspectRatio:false, animation:false, interaction:{mode:'index',intersect:false},
-    plugins:{legend:{position:'bottom',labels:{boxWidth:12}}, tooltip:{callbacks:{title:it=>it[0].label+' pontos', label:c=>c.dataset.label+': '+(c.parsed.y==null?'–':fmt1.format(c.parsed.y)+'%')}}},
-    scales:{x:{title:{display:true,text:'Pontuação final'},grid:{display:false},border:{display:false}},
-      y:{min:0,max:100,title:{display:true,text:'Chance da zona (%)'},grid:{display:false},border:{display:false}},
-      y1:{position:'right',min:0,title:{display:true,text:'Pontuação do time (%)'},grid:{display:false},border:{display:false}}}};
-  if (chCurve) chCurve.destroy();
-  chCurve = new Chart($('#chCurve'), {data:{labels, datasets}, options});
+  const M = res.MAXP, N = res.sims, t = focus, cnt = new Float64Array(M), Z = {};
+  ['tit','libd','lib','sula','z4'].forEach(k=>{ Z[k] = new Float64Array(M); const PR = res.m[k].pts; for (let u=0;u<NT;u++) for (let p=0;p<M;p++) Z[k][p] += PR[u*M+p]; });
+  for (let u=0;u<NT;u++) for (let p=0;p<M;p++) cnt[p] += res.ptsCnt[u*M+p];
+  const minN = Math.max(50, N*0.0005), names = zoneSegments().map(z=>z[0]), cols = zoneSegments().map(z=>css(z[3]));
+  const segsAt = p => { const c = cnt[p], tit = Z.tit[p]/c, ld = Z.libd[p]/c, l = Z.lib[p]/c, su = Z.sula[p]/c, q = Z.z4[p]/c;
+    const v = [tit, Math.max(ld-tit,0), Math.max(l-ld,0), su, Math.max(1-l-su-q,0), q]; return names.map((n,i)=>({n, v:v[i], col:cols[i]})); };
+  let ps = []; for (let p=M-1;p>=0;p--) if (cnt[p]>=minN) ps.push(p);
+  // corta as pontas repetidas: só uma linha de "título garantido" no topo e uma de "queda certa" embaixo
+  while (ps.length>2 && segsAt(ps[1])[0].v>=0.995) ps.shift();
+  while (ps.length>2 && segsAt(ps[ps.length-2])[5].v>=0.995) ps.pop();
+  $('#ptsTeamHead').textContent = TEAMS[t].c;
+  // pontuações seguidas em que uma zona tem 99,5% ou mais viram uma linha só (por exemplo, 67 a 76)
+  const rows = [];
+  ps.forEach(p=>{ const segs = segsAt(p), dom = segs.findIndex(x=>x.v>=0.995), tp = res.ptsCnt[t*M+p]/N, last = rows[rows.length-1];
+    if (dom>=0 && last && last.dom===dom){ last.lo = p; last.tp += tp; } else rows.push({hi:p, lo:p, dom, segs, tp}); });
+  $('#ptsBars').innerHTML = rows.map(r=>{ const lbl = r.hi===r.lo ? String(r.hi) : r.lo+'–'+r.hi;
+    return '<div class="ptsrow'+(r.tp>=0.05?' hot':'')+'" role="img" aria-label="'+lbl+' pontos: '+r.segs.filter(x=>x.v>=0.0005).map(x=>x.n+' '+pctTxt(x.v)).join(', ')+'">'+
+      '<span class="pp num">'+lbl+'</span><span class="zonebar">'+zoneBarHTML(r.segs, 0.12)+'</span><span class="tp num">'+(r.tp>=0.005?fmt0.format(Math.round(r.tp*100))+'%':'')+'</span></div>'; }).join('');
+  $('#ptsLeg').innerHTML = zoneLegHTML(zoneSegments().filter(([,a,b])=>a<=b).map(([n,,,c])=>({n, v:1, col:css(c)})), 'names');
 }
 /* Todos os times: uma faixa de 100% por time, na ordem da tabela */
 function renderAllTeams(){
@@ -2389,16 +2410,11 @@ renderThemeBtn();
 /* ---------- meu time ---------- */
 const SNAP = DATA.snap, PREV = DATA.prevSnap;
 function snapDate(s){ const m = s && /^(\d{2}\/\d{2})/.exec(s.asof||''); return m ? m[1] : ''; }
-function cardTeam(){ return PAGE_TEAM!=null ? PAGE_TEAM : myTeam; }
+function cardTeam(){ return focus; }
 function renderMyCard(){
-  const box = $('#myCard'), t = cardTeam();
-  if (t==null){
-    box.hidden = false;
-    box.innerHTML = '<div class="mc-empty"><span>Escolha o seu time e a página passa a abrir com ele em destaque.</span><button class="btn primary" type="button" data-mc="pick">Escolher meu time</button></div>';
-    return;
-  }
-  if (!res){ box.hidden = true; return; }
-  box.hidden = false;
+  const box = $('#mcBody'), t = cardTeam();
+  $('#mcDot').innerHTML = clubDot(TEAMS[t]); if ($('#selTeam').value!==String(t)) $('#selTeam').value = String(t);
+  if (!res){ box.innerHTML = ''; return; }
   const order = ['tit','lib','sula','z4'];
   let mets = order.filter(m=>{ const p = MET[m].prob(res)[t]; return p>0.001 && p<0.999; }).slice(0,3);
   if (!mets.length) mets = [MET.z4.prob(res)[t]>0.5 ? 'z4' : 'lib'];
@@ -2424,10 +2440,7 @@ function renderMyCard(){
     const mine = SNAP.added.filter(g=>g[0]===t||g[1]===t).map(g=>TEAMS[g[0]].n+' '+g[2]+' x '+g[3]+' '+TEAMS[g[1]].n);
     story = mine.length ? 'Desde '+since+': '+mine.join('; ')+'.' : TEAMS[t].n+' não jogou desde '+since+'; a variação vem dos outros resultados.';
   }
-  const who = PAGE_TEAM!=null ? (myTeam===PAGE_TEAM ? 'Seu time' : 'Time') : 'Seu time';
-  const act = PAGE_TEAM!=null && myTeam!==PAGE_TEAM ? '<button class="linkbtn" type="button" data-mc="save">salvar como meu time</button>' : '<button class="linkbtn" type="button" data-mc="pick">trocar time</button>';
-  box.innerHTML = '<div class="mc-team"><span class="mc-lbl">'+who+'</span><span class="mc-name">'+clubDot(TEAMS[t])+TEAMS[t].n+'</span><span class="mc-act">'+act+' · <button class="linkbtn" type="button" data-mc="go">ver análise</button></span></div>'+
-    '<div class="mc-mets">'+cells+'</div>'+
+  box.innerHTML = '<div class="mc-mets">'+cells+'</div>'+
     (()=>{ const segs = zoneSegsOf(res, t); return '<div class="mc-zones"><div class="zonebar" role="img" aria-label="'+TEAMS[t].n+' termina em: '+segs.filter(x=>x.v>=0.0005).map(x=>x.n+' '+pctTxt(x.v)).join(', ')+'">'+zoneBarHTML(segs, 0.07)+'</div><div class="zoneleg">'+zoneLegHTML(segs, 'nz')+'</div></div>'; })()+
     (story || filled() ? '<p class="mc-story">'+story+(filled()?(story?' ':'')+(filled()===1?'Números com o seu palpite.':'Números com os seus '+filled()+' palpites.'):'')+'</p>' : '');
 }
@@ -2448,8 +2461,8 @@ function chooseTeam(i){
   myTeam = i; mySkipped = false;
   try { localStorage.setItem(MY_KEY, TEAMS[i].c); } catch(e){}
   closeTeamModal();
-  if (PAGE_TEAM==null){ focus = i; $('#selFocus').value = String(i); gMode = 'team'; try{ localStorage.setItem(GM_KEY, gMode); }catch(e){} }
-  renderGames(); if (res){ renderTable(); renderFocus(); } renderMyCard();
+  gMode = 'team'; try{ localStorage.setItem(GM_KEY, gMode); }catch(e){}
+  setFocus(i);
 }
 $('#tmGrid').addEventListener('click', e=>{ const b = e.target.closest('button[data-t]'); if (b) chooseTeam(+b.dataset.t); });
 $('#tmSkip').addEventListener('click', ()=>{ if (myTeam==null){ mySkipped = true; try { localStorage.setItem(MY_KEY, '-'); } catch(e){} } closeTeamModal(); renderMyCard(); });
@@ -2486,7 +2499,7 @@ if(sharedAtStart&&!sharedAtStart.invalid)requestAnimationFrame(()=>$('#foco').sc
 window.addEventListener('hashchange',()=>{
   const shared=readSharedScenario();if(!shared)return;
   if(!useSharedScenario(shared)){msg('#codeMsg','Link de cenário inválido.');return;}
-  $('#selFocus').value=String(focus);renderPrec();renderMetricToggle();setView('sim');
+  $('#selTeam').value=String(focus);renderPrec();renderMetricToggle();setView('sim');
   applyLoaded(shared.decoded);$('#foco').scrollIntoView({block:'start'});
   try { history.replaceState(null,'',location.pathname+location.search); } catch(e){}
 });
