@@ -236,7 +236,14 @@ details.adv[open] summary{margin-bottom:8px}
 .bigbox{max-width:280px}
 .biglbl{font-size:.84rem;font-family:var(--f-detail)}
 .bigsub{font-size:.76rem;font-family:var(--f-detail);margin-top:2px}
-.vagas{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;background:var(--surface-2);border-radius:12px;padding:10px 14px;font-family:var(--f-detail);font-size:.84rem}
+.vagasbox{background:var(--surface);border-radius:var(--r);padding:8px 16px;font-family:var(--f-detail);font-size:.84rem}
+.vagasbox summary{cursor:pointer;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;padding:6px 0;list-style:none}
+.vagasbox summary::-webkit-details-marker{display:none}
+.vagasbox summary::before{content:"";width:0;height:0;border-style:solid;border-width:5px 0 5px 7px;border-color:transparent transparent transparent var(--muted);align-self:center;transition:transform .15s}
+.vagasbox[open] summary::before{transform:rotate(90deg)}
+.vagasbox .vg-sum{color:var(--muted);font-size:.8rem}
+.vagasbox[open] summary{margin-bottom:8px}
+.vagas{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;background:var(--surface-2);border-radius:12px;padding:10px 14px;margin-bottom:8px}
 .vagas .vg-title{font-weight:600;color:var(--brown);text-transform:uppercase;letter-spacing:.1em;font-size:.72rem}
 .vagas label{display:inline-flex;align-items:center;gap:6px;color:var(--muted)}
 .vagas input{width:3.2em;font:inherit;font-weight:700;text-align:center;border:0;border-radius:7px;padding:4px;background:var(--surface);color:var(--ink);font-variant-numeric:tabular-nums}
@@ -397,6 +404,16 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
       <button class="btn" id="btnResetAll" type="button">Limpar todos os palpites</button>
     </div>
   </div>
+  <details class="vagasbox" id="vagasBox">
+    <summary><span class="vg-title" id="vgTitle">Vagas continentais</span><span class="vg-sum num" id="vgSum"></span></summary>
+    <div class="vagas" id="vagas" role="group" aria-labelledby="vgTitle">
+      <label for="vgD">Libertadores, fase de grupos <input id="vgD" type="number" inputmode="numeric" min="1" max="8" step="1"></label>
+      <label for="vgP">fase preliminar <input id="vgP" type="number" inputmode="numeric" min="0" max="4" step="1"></label>
+      <label for="vgS">Sul-Americana <input id="vgS" type="number" inputmode="numeric" min="0" max="10" step="1"></label>
+      <button class="btn" id="vgReset" type="button" hidden>Voltar ao padrão (4 + 1 + 6)</button>
+      <span class="vg-info" id="vgInfo" aria-live="polite"></span>
+    </div>
+  </details>
   <div class="toast" id="migrMsg" aria-live="polite" hidden></div>
 
   <div class="grid">
@@ -453,14 +470,6 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
       </div>
       <div class="bigbox"><div class="bignum num" id="bigPct">–</div><div class="muted biglbl" id="bigLbl">chance de rebaixamento</div><div class="muted bigsub" id="bigSub" hidden></div></div>
       <div class="facts" id="facts"></div>
-    </div>
-    <div class="vagas" id="vagas" role="group" aria-labelledby="vgTitle">
-      <span class="vg-title" id="vgTitle">Vagas continentais</span>
-      <label for="vgD">Libertadores, fase de grupos <input id="vgD" type="number" inputmode="numeric" min="1" max="8" step="1"></label>
-      <label for="vgP">fase preliminar <input id="vgP" type="number" inputmode="numeric" min="0" max="4" step="1"></label>
-      <label for="vgS">Sul-Americana <input id="vgS" type="number" inputmode="numeric" min="0" max="10" step="1"></label>
-      <button class="btn" id="vgReset" type="button" hidden>Voltar ao padrão (4 + 1 + 6)</button>
-      <span class="vg-info" id="vgInfo" aria-live="polite"></span>
     </div>
     <div class="cards">
       <div class="wide">
@@ -538,7 +547,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
 
       <section class="step"><span class="stepn">4</span><div>
         <h2>Ajuste as vagas, se quiser</h2>
-        <p>Na faixa <b>Vagas continentais</b>, mude quantos clubes vão à fase de grupos e à fase preliminar da Libertadores e quantos vão à Sul-Americana. O padrão de 2026 é 4 + 1 + 6. Útil quando um campeão de copa abre vaga extra pela tabela.</p>
+        <p>Abra a seção <b>Vagas continentais</b>, logo abaixo das opções avançadas, e mude quantos clubes vão à fase de grupos e à fase preliminar da Libertadores e quantos vão à Sul-Americana. O padrão de 2026 é 4 + 1 + 6. Útil quando um campeão de copa abre vaga extra pela tabela.</p>
       </div></section>
 
       <section class="step"><span class="stepn">5</span><div>
@@ -683,7 +692,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
           <h2><span class="n">9</span>O que o site calcula</h2>
           <ul>
             <li><b>Chance de queda</b>: média do indicador de rebaixamento de cada time nas <em>N</em> simulações.</li>
-            <li><b>Título, Libertadores e Sul-Americana</b>: fração das simulações em que o time termina em 1º (título), do 1º ao 5º (Libertadores: quatro vagas na fase de grupos e uma na fase preliminar) ou do 6º ao 11º (Sul-Americana), conforme a distribuição de vagas da temporada 2026<sup class="ref"><a href="#r17">[17]</a></sup>. O número de vagas pode ser alterado no painel do time em foco (fase de grupos, fase preliminar e Sul-Americana); a mudança vale para todo o painel, inclusive o histórico, que guarda a distribuição de posição final de cada time em cada rodada e por isso pode ser relido com qualquer configuração. Com fase preliminar, o painel da Libertadores separa a chance de fase de grupos e a de fase preliminar. Vagas extras abertas quando um clube brasileiro vence a Copa do Brasil, a Libertadores ou a Sul-Americana não são consideradas. Um empate na fronteira de uma zona divide as vagas igualmente. No painel do time em foco você escolhe a métrica, e todos os gráficos e tabelas do painel passam a usá-la.</li>
+            <li><b>Título, Libertadores e Sul-Americana</b>: fração das simulações em que o time termina em 1º (título), do 1º ao 5º (Libertadores: quatro vagas na fase de grupos e uma na fase preliminar) ou do 6º ao 11º (Sul-Americana), conforme a distribuição de vagas da temporada 2026<sup class="ref"><a href="#r17">[17]</a></sup>. O número de vagas pode ser alterado na seção Vagas continentais, abaixo das opções avançadas (fase de grupos, fase preliminar e Sul-Americana); a mudança vale para a tabela e para todo o painel do time em foco, inclusive o histórico, que guarda a distribuição de posição final de cada time em cada rodada e por isso pode ser relido com qualquer configuração. Com fase preliminar, o painel da Libertadores separa a chance de fase de grupos e a de fase preliminar. Vagas extras abertas quando um clube brasileiro vence a Copa do Brasil, a Libertadores ou a Sul-Americana não são consideradas. Um empate na fronteira de uma zona divide as vagas igualmente. No painel do time em foco você escolhe a métrica, e todos os gráficos e tabelas do painel passam a usá-la.</li>
             <li><b>Pontuação final provável</b>: mediana da pontuação final simulada, com a faixa central de 80% (percentis 10 e 90): em 80% dos campeonatos simulados o time termina dentro dela.</li>
             <li><b>Rebaixamento por pontuação</b>: para cada pontuação final <em>k</em>, a fração dos times que caíram entre todos os que terminaram com <em>k</em> pontos, somando os 20 clubes de todas as simulações: P(cair | terminar com <em>k</em> pontos), a mesma leitura da tabela por pontuação da UFMG<sup class="ref"><a href="#r8">[8]</a></sup>.</li>
             <li><b>Jogos decisivos</b>: as simulações são separadas pelo resultado sorteado em cada jogo e a chance de queda é recalculada em cada grupo. Cada coluna é P(cair | resultado), por isso as três não somam 100%; ponderadas pela chance de cada resultado, dão a chance de queda atual (lei da probabilidade total). O impacto é a diferença entre o maior e o menor valor. O ValorFinal usa a mesma separação no seu índice de impacto<sup class="ref"><a href="#r9">[9]</a></sup>.</li>
@@ -1763,7 +1772,6 @@ Object.values(MET).forEach(D=>{ D.prob = r=>r.m[D.key].prob; D.se = r=>r.m[D.key
 try { const v = localStorage.getItem(MET_KEY); if (MET[v]) metric = v; } catch(e){}
 const MET_TITLE = {z4:['Chance de queda por time','Queda'], tit:['Chance de título por time','Título'], lib:['Chance de Libertadores por time','Libertadores'], sula:['Chance de Sul-Americana por time','Sul-Americana']};
 function renderMetricToggle(){
-  $('#vagas').hidden = metric!=='lib' && metric!=='sula';
   document.querySelectorAll('#metricSel button, #tblMetric button').forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.m===metric)));
   $('#hTabela').textContent = MET_TITLE[metric][0]; $('#thMet').textContent = MET_TITLE[metric][1];
   $('#hDec').textContent = 'Jogos decisivos';
@@ -1776,7 +1784,12 @@ function renderVagas(){
   const L = VAGAS.d+VAGAS.p, [sa, sb] = zoneRange('sula');
   $('#vgInfo').textContent = 'Libertadores: '+posTxt(0, L-1)+(VAGAS.p?' ('+posTxt(0,VAGAS.d-1)+' na fase de grupos, '+posTxt(VAGAS.d, L-1)+' na preliminar)':'')+' · Sul-Americana: '+(sb<sa?'sem vagas':posTxt(sa, sb))+(vagasDefault()?' · padrão de 2026':'');
   $('#vgReset').hidden = vagasDefault();
+  $('#vgSum').textContent = VAGAS.d+' + '+VAGAS.p+' + '+VAGAS.s+(vagasDefault() ? ' · padrão de 2026' : ' · alterado');
 }
+/* seção de vagas: fechada por padrão; lembra se a pessoa deixou aberta */
+const VG_OPEN_KEY = 'bc-vagas-aberto';
+try { if (localStorage.getItem(VG_OPEN_KEY)==='1') $('#vagasBox').open = true; } catch(e){}
+$('#vagasBox').addEventListener('toggle', ()=>{ try { localStorage.setItem(VG_OPEN_KEY, $('#vagasBox').open ? '1' : '0'); } catch(e){} });
 function setVagas(v, silent){
   if (!validVagas(v)) return false;
   VAGAS = {d:+v.d, p:+v.p, s:+v.s};
