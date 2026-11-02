@@ -28,7 +28,7 @@
   --moss:#4e6035; --moss-soft:#dfe3cd; --on-moss:#faf7f1;
   --brown:#7a5636; --brown-soft:#eadccb;
   --yellow:#c99419; --yellow-soft:#f4e5bb;
-  --c-tit:#a87b10; --c-lib:#4e6035; --c-pre:#97a978; --c-sula:#4f6d8a; /* cores das zonas (tabela, legenda, gráficos) */
+  --c-tit:#a87b10; --c-lib:#4e6035; --c-pre:#97a978; --c-sula:#4f6d8a; --c-meio:#d3c8b2; /* cores das zonas (tabela, legenda, gráficos) */
   --z4:#a3432b; --z4-soft:#f1dcd2; --good:#4e6035;
   --f-main:"Montserrat",system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-detail:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -39,14 +39,14 @@
   --moss:#a6ba7f; --moss-soft:#2f3625; --on-moss:#1a1915;
   --brown:#cfa57c; --brown-soft:#3a2f24;
   --yellow:#e4b84d; --yellow-soft:#3d3420;
-  --c-tit:#e4b84d; --c-lib:#a6ba7f; --c-pre:#66764a; --c-sula:#9db8d3;
+  --c-tit:#e4b84d; --c-lib:#a6ba7f; --c-pre:#66764a; --c-sula:#9db8d3; --c-meio:#5a5446;
   --z4:#e5866e; --z4-soft:#40271f; --good:#a6ba7f; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#1a1915; --surface:#23211b; --surface-2:#2d2a22; --ink:#ede6d6; --muted:#a69e8b; --line:#3b372c;
   --moss:#a6ba7f; --moss-soft:#2f3625; --on-moss:#1a1915;
   --brown:#cfa57c; --brown-soft:#3a2f24;
   --yellow:#e4b84d; --yellow-soft:#3d3420;
-  --c-tit:#e4b84d; --c-lib:#a6ba7f; --c-pre:#66764a; --c-sula:#9db8d3;
+  --c-tit:#e4b84d; --c-lib:#a6ba7f; --c-pre:#66764a; --c-sula:#9db8d3; --c-meio:#5a5446;
   --z4:#e5866e; --z4-soft:#40271f; --good:#a6ba7f; color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -276,6 +276,13 @@ select{font:inherit;padding:7px 10px;border-radius:999px;border:0;background:var
 .kpi span{font-family:var(--f-detail);font-size:.76rem;color:var(--muted)}
 .kpi small{font-family:var(--f-detail);font-size:.72rem;color:var(--muted);margin-top:4px}
 .kpi.changed{box-shadow:inset 0 0 0 2px var(--yellow)}
+.kpi-lbl{font-family:var(--f-detail);font-size:.74rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.zonebar{display:flex;height:30px;border-radius:6px;overflow:hidden;background:var(--surface-2)}
+.zonebar div{display:flex;align-items:center;justify-content:center;font-family:var(--f-detail);font-weight:600;font-size:.76rem;white-space:nowrap;overflow:hidden;min-width:0}
+.zoneleg{display:flex;flex-wrap:wrap;gap:4px 14px;font-family:var(--f-detail);font-size:.78rem;color:var(--muted)}
+.zoneleg span{display:inline-flex;align-items:center;gap:5px}
+.zoneleg i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.zoneleg b{color:var(--ink);font-weight:600}
 .kpi.changed small{color:var(--brown);font-weight:600}
 
 /* cenários */
@@ -487,9 +494,12 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
         <p class="note" id="decNote"></p>
       </div>
       <div>
-        <div class="panel-head"><h3 id="hPts">Rebaixamento por pontuação</h3></div>
+        <div class="panel-head"><h3 id="hPts">Posição final</h3></div>
+        <span class="kpi-lbl" id="kpiLbl">Pontos de corte</span>
         <div class="kpis" id="kpis"></div>
-        <div class="chartbox"><canvas id="chPts" aria-label="Probabilidade de rebaixamento por pontuação final"></canvas></div>
+        <div class="chartbox"><canvas id="chPts" aria-label="Chance de terminar em cada posição"></canvas></div>
+        <div class="zonebar" id="zoneBar" role="img"></div>
+        <div class="zoneleg" id="zoneLeg"></div>
         <p class="note" id="ptsNote"></p>
       </div>
     </div>
@@ -541,7 +551,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
           <li><b>Número grande</b>: a chance do time, com o erro numérico da simulação (o ± mede só o efeito de simular um número finito de campeonatos, não toda a incerteza da previsão).</li>
           <li><b>Evolução rodada a rodada</b>: como a chance mudou ao longo do campeonato. A linha tracejada é o seu cenário, com um ponto por rodada que você preencher inteira.</li>
           <li><b>Jogos decisivos</b>: a chance do time em cada resultado de cada jogo da rodada. As colunas não somam 100%; cada uma responde "e se esse resultado acontecer?". O <b>impacto</b> mostra os jogos que mais mexem com o time.</li>
-          <li><b>Por pontuação</b>: a chance de quem termina com cada número de pontos e os pontos de corte, por exemplo quantos pontos deixam o risco de queda abaixo de 1%.</li>
+          <li><b>Posição final</b>: a chance de o time terminar em cada posição, do 1º ao 20º, com as cores das zonas, e logo abaixo a soma por zona (título, Libertadores, pré-Libertadores, Sul-Americana, meio da tabela e queda), que dá 100%. Em cima, os pontos de corte: por exemplo, quantos pontos deixam o risco de queda abaixo de 1%.</li>
         </ul>
       </div></section>
 
@@ -1777,8 +1787,8 @@ function renderMetricToggle(){
   $('#hTabela').textContent = MET_TITLE[metric][0]; $('#thMet').textContent = MET_TITLE[metric][1];
   $('#hDec').textContent = 'Jogos decisivos';
   const D = MET[metric];
-  $('#hPts').textContent = D.ptsTitle;
-  $('#ptsNote').textContent = 'Linha: chance de '+verbOf(metric)+' para quem termina o campeonato com aquela pontuação, somando todos os times de todas as simulações. Barras: distribuição da pontuação final do time em foco. Os pontos de corte acima mudam com os seus palpites; quando mudam, o quadro fica destacado e mostra o valor sem palpites. A menor pontuação vista nas simulações não é um limite matemático.'+(metric==='lib'||metric==='sula'?' Vagas extras abertas por campeões de Copa do Brasil, Libertadores ou Sul-Americana não são consideradas.':'');
+  $('#kpiLbl').textContent = 'Pontos de corte · '+D.noun;
+  $('#ptsNote').textContent = 'Barras: chance de o time em foco terminar em cada posição, nas cores da zona. A faixa abaixo soma as posições de cada zona e dá 100%. Os pontos de corte acima valem para '+D.noun+': para cada pontuação final, somam-se todos os times de todas as simulações. Com palpites, as barras vazadas mostram o cenário sem palpites, e os pontos de corte que mudarem ficam destacados com o valor sem palpites. A maior ou menor pontuação vista nas simulações não é um limite matemático.'+(metric==='lib'||metric==='sula'?' Vagas extras abertas por campeões de Copa do Brasil, Libertadores ou Sul-Americana não são consideradas.':'');
 }
 function renderVagas(){
   $('#vgD').value = VAGAS.d; $('#vgP').value = VAGAS.p; $('#vgS').value = VAGAS.s;
@@ -2051,33 +2061,35 @@ function renderKpis(){
     return '<div class="kpi'+(diff?' changed':'')+'"><b class="num">'+v+'</b><span>'+l+'</span>'+(base?'<small class="num">'+(diff?'sem palpites: '+b:'igual sem palpites')+'</small>':'')+'</div>';
   }).join('');
 }
+/* Posição final: chance de cada posição (1º a 20º) nas cores das zonas, e a soma por zona logo abaixo */
+function zoneSegments(){
+  const d = VAGAS.d, p = VAGAS.p, sEnd = d+p+VAGAS.s-1;
+  return [['Título',0,0,'--c-tit'],['Libertadores (grupos)',1,d-1,'--c-lib'],['Pré-Libertadores',d,d+p-1,'--c-pre'],
+    ['Sul-Americana',d+p,Math.min(sEnd,15),'--c-sula'],['Meio da tabela',Math.max(sEnd+1,d+p),15,'--c-meio'],['Queda',16,19,'--z4']];
+}
+function posColor(q){ const z = zoneSegments().find(([,a,b])=>q>=a && q<=b); return css(z ? z[3] : '--c-meio'); }
+function inkOn(hex){ const m = /^#?([0-9a-f]{6})$/i.exec(hex||''); if (!m) return css('--ink'); const n = parseInt(m[1],16), r=(n>>16&255)/255, g=(n>>8&255)/255, b=(n&255)/255;
+  const f = c => c<=0.03928 ? c/12.92 : Math.pow((c+0.055)/1.055,2.4), L = 0.2126*f(r)+0.7152*f(g)+0.0722*f(b); return L>0.32 ? '#2a281f' : '#ffffff'; }
 function renderPoints(){
   if (!window.Chart || !res) return;
   baseChartOpts();
-  const D = MET[metric], PR = D.pts(res), M = res.MAXP, N = res.sims, t = focus;
-  const gc = new Float64Array(M), gr = new Float64Array(M);
-  for (let u=0;u<NT;u++) for (let p=0;p<M;p++){ gc[p]+=res.ptsCnt[u*M+p]; gr[p]+=PR[u*M+p]; }
-  const pr = p => gc[p] ? gr[p]/gc[p] : null;
-  let lo = M, hi = 0;
-  for (let p=0;p<M;p++){ const v = pr(p); if (v!=null && v>0.002 && v<0.998){ lo=Math.min(lo,p); hi=Math.max(hi,p); } }
-  for (let p=0;p<M;p++){ if (res.ptsCnt[t*M+p]/N>0.003){ lo=Math.min(lo,p); hi=Math.max(hi,p); } }
-  if (lo>hi){ lo=30; hi=50; }
-  lo=Math.max(0,lo-2); hi=Math.min(M-1,hi+2);
-  const labels=[], lineD=[], barD=[];
-  for (let p=lo;p<=hi;p++){ labels.push(p); const v=pr(p); lineD.push(v==null?null:+(v*100).toFixed(2)); barD.push(+(res.ptsCnt[t*M+p]/N*100).toFixed(2)); }
   renderKpis();
-  const lineColor = css(D.color), barColor = D.color==='--c-lib' ? css('--brown') : css('--moss');
-  const data = {labels, datasets:[
-    {type:'line', label:D.lineLbl+' com essa pontuação (%)', data:lineD, borderColor:lineColor, backgroundColor:lineColor, pointRadius:2, borderWidth:2, tension:.25, yAxisID:'y', spanGaps:true},
-    {type:'bar', label:'Pontuação final de '+TEAMS[t].n+' (%)', data:barD, backgroundColor:barColor, borderRadius:3, yAxisID:'y1', maxBarThickness:22}
-  ]};
+  const t = focus, pos = q => res.pos[t*NT+q], withBase = filled() && baseRes;
+  const labels = [...Array(NT)].map((_,q)=>(q+1)+'º');
+  const datasets = [{label: withBase ? 'Com seus palpites (cores da zona)' : 'Chance de terminar na posição', data: labels.map((_,q)=>+(pos(q)*100).toFixed(2)),
+    backgroundColor: labels.map((_,q)=>posColor(q)), borderRadius:3, maxBarThickness:26}];
+  if (withBase) datasets.unshift({label:'Sem palpites', data: labels.map((_,q)=>+(baseRes.pos[t*NT+q]*100).toFixed(2)), backgroundColor:'transparent', borderColor: css('--muted'), borderWidth:1.5, borderRadius:3, maxBarThickness:26});
   const options = {responsive:true, maintainAspectRatio:false, animation:false, interaction:{mode:'index',intersect:false},
-    plugins:{legend:{position:'bottom',labels:{boxWidth:12}}, tooltip:{callbacks:{title:it=>it[0].label+' pontos', label:c=>c.dataset.label+': '+(c.parsed.y==null?'–':fmt1.format(c.parsed.y)+'%')}}},
-    scales:{x:{title:{display:true,text:'Pontuação final'},grid:{display:false},border:{display:false}},
-      y:{min:0,max:100,title:{display:true,text:D.evoAxis},grid:{display:false},border:{display:false}},
-      y1:{position:'right',min:0,title:{display:true,text:'Prob. da pontuação (%)'},grid:{display:false},border:{display:false}}}};
+    plugins:{legend:{display:!!withBase, position:'bottom', labels:{boxWidth:12, generateLabels:ch=>ch.data.datasets.map((ds,i)=>({text:ds.label, datasetIndex:i, fillStyle: i===0 && withBase ? 'transparent' : css('--ink'), strokeStyle: css(i===0 && withBase ? '--muted' : '--ink'), lineWidth:1.5, fontColor: css('--muted')}))}}, tooltip:{callbacks:{title:it=>it[0].label+' lugar', label:c=>c.dataset.label+': '+fmt1.format(c.parsed.y)+'%'}}},
+    scales:{x:{grid:{display:false},border:{display:false},ticks:{autoSkip:false,maxRotation:0,font:{size:innerWidth<560?9:10},callback:(v,i)=>innerWidth<560 ? String(i+1) : (i+1)+'º'}},
+      y:{min:0,title:{display:true,text:'Chance (%)'},grid:{display:false},border:{display:false}}}};
   if (chPts){ chPts.destroy(); }
-  chPts = new Chart($('#chPts'), {data, options});
+  chPts = new Chart($('#chPts'), {type:'bar', data:{labels, datasets}, options});
+  // faixa de 100% por zona
+  const segs = zoneSegments().filter(([,a,b])=>a<=b).map(([n,a,b,c])=>{ let v = 0; for (let q=a;q<=b;q++) v += pos(q); return {n, v, col:css(c)}; });
+  $('#zoneBar').innerHTML = segs.filter(x=>x.v>=0.0005).map(x=>'<div style="flex:'+x.v+';background:'+x.col+';color:'+inkOn(x.col)+'" title="'+x.n+': '+pctTxt(x.v)+'">'+(x.v>=0.08?fmt0.format(Math.round(x.v*100))+'%':'')+'</div>').join('');
+  $('#zoneBar').setAttribute('aria-label', TEAMS[t].n+': '+segs.filter(x=>x.v>=0.0005).map(x=>x.n+' '+pctTxt(x.v)).join(', '));
+  $('#zoneLeg').innerHTML = segs.map(x=>'<span><i style="background:'+x.col+'"></i>'+x.n+' <b class="num">'+pctTxt(x.v)+'</b></span>').join('');
 }
 
 function roundComplete(r){ return roundGames(r).every(x=>choice[x.i]); }
