@@ -14,7 +14,7 @@
 <meta property="og:image:alt" content="Bola de Cristal, simulador do Brasileirão 2026">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#4e6035">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M18 50h28l4 8H14z' fill='%237a5636'/%3E%3Ccircle cx='32' cy='29' r='22' fill='%234e6035'/%3E%3Ccircle cx='24' cy='21' r='6' fill='%23f4e5bb'/%3E%3Ccircle cx='40' cy='36' r='3' fill='%23c99419'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='38' r='31' fill='%23eee4c9' stroke='%233d4e2a' stroke-width='3'/%3E%3Cg fill='%234e6035' stroke='%234e6035' stroke-width='2.3' stroke-linejoin='round'%3E%3Cpath d='M50 24 62 33 57.5 47H42.5L38 33Z'/%3E%3Cpath d='M50 24V12m12 21 17-5M57.5 47l10 14m-25-14-10 14M38 33l-17-5' fill='none'/%3E%3C/g%3E%3Cpath d='M28 28q4-10 14-13' fill='none' stroke='%23fffaf0' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M33 69h34l6 8H27Z' fill='%237a5636'/%3E%3Cpath d='M28 78h44l6 10H22Z' fill='%23503a29'/%3E%3Cpath d='M30 80h40' stroke='%23c99419' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Bola de Cristal","alternateName":"Simulador do Brasileirão","url":"https://boladecristal.app.br/","inLanguage":"pt-BR"}</script>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -334,7 +334,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
 .chip.live{white-space:normal;max-width:100%;line-height:1.45;gap:9px}
 .calc-orb .crystal-ball{width:42px;height:42px}
 .is-calculating .crystal-ball{filter:drop-shadow(0 0 6px color-mix(in srgb,var(--yellow) 45%,transparent))}
-.crystal-spin{transform-origin:32px 26px;transform-box:view-box;animation:crystal-turn 3s linear infinite;animation-play-state:paused}
+.crystal-spin{transform-origin:50px 38px;transform-box:view-box;animation:crystal-turn 3s linear infinite;animation-play-state:paused}
 .is-calculating .crystal-spin{animation-play-state:running}
 .is-calculating .orb-reflection{stroke:var(--yellow);fill:none}
 @keyframes crystal-turn{to{transform:rotate(360deg)}}
@@ -362,7 +362,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
 
 <script>try{var bcT=localStorage.getItem('bc-tema');if(bcT==='dark'||bcT==='light')document.documentElement.setAttribute('data-theme',bcT);}catch(e){}</script>
 
-<svg class="brand-symbols" aria-hidden="true" focusable="false"><symbol id="crystal-mark" viewBox="0 0 64 64"><g class="crystal-spin"><circle cx="32" cy="26" r="21" fill="var(--moss-soft)" fill-opacity=".28" stroke="var(--moss)" stroke-width="1.6"/><path d="M32 18l7.6 5.5-2.9 9h-9.4l-2.9-9z" fill="var(--moss)" fill-opacity=".15" stroke="var(--moss)" stroke-width="1.1" stroke-linejoin="round"/><path d="M32 18V5m7.6 18.5L52 19.5M36.7 32.5 44.5 43m-17.2-10.5L19.5 43m4.9-19.5L12 19.5" fill="none" stroke="var(--moss)" stroke-width="1" opacity=".55"/><path class="orb-reflection" d="M18 23c1-6 5-10 11-12" fill="none" stroke="var(--surface)" stroke-width="3" stroke-linecap="round"/></g><path d="M20 48c-3 1-4 2-4 3 0 2 7 4 16 4s16-2 16-4c0-1-1-2-4-3M21 54l-3 5m25-5 3 5M13 60h38" fill="none" stroke="var(--brown)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol></svg>
+<svg class="brand-symbols" aria-hidden="true" focusable="false"><symbol id="crystal-mark" viewBox="0 0 100 100"><g class="crystal-spin"><circle cx="50" cy="38" r="31" fill="#eee4c9" stroke="#3d4e2a" stroke-width="3"/><g fill="#4e6035" stroke="#4e6035" stroke-width="2.3" stroke-linejoin="round"><path d="M50 24 62 33 57.5 47H42.5L38 33Z"/><path d="M50 24V12m12 21 17-5M57.5 47l10 14m-25-14-10 14M38 33l-17-5" fill="none"/></g><path class="orb-reflection" d="M28 28q4-10 14-13" fill="none" stroke="#fffaf0" stroke-width="4" stroke-linecap="round"/></g><path d="M33 69h34l6 8H27Z" fill="#7a5636"/><path d="M28 78h44l6 10H22Z" fill="#503a29"/><path d="M30 80h40" stroke="#c99419" stroke-width="2.5" stroke-linecap="round"/></symbol></svg>
 <dialog id="cardDialog" class="card-dialog" aria-labelledby="cardTitle">
   <div class="card-dialog-head"><div><span class="eyebrow">Pronto para compartilhar</span><h2 id="cardTitle">Seu time, seu cenário.</h2></div><button class="btn" id="btnCloseCard" type="button" aria-label="Fechar prévia do card">Fechar</button></div>
   <div class="card-layout"><img id="cardPreview" width="270" height="480" alt="Prévia do card do time em foco"><div class="card-copy"><span class="story-label">STORY · 1080 × 1920</span><h3>Seu cenário.<br>A conversa continua.</h3><p>O link leva seus palpites, o time e o objetivo escolhido. Compartilhe a imagem com o link na mensagem do WhatsApp.</p><button class="btn primary" id="btnShareCard" type="button" hidden>Compartilhar card e link</button><a class="btn whatsapp-link" id="btnWhatsApp" target="_blank" rel="noopener noreferrer">Enviar link no WhatsApp</a><button class="btn" id="btnCopyScenarioLink" type="button">Copiar link do cenário</button><button class="btn" id="btnDownloadCard" type="button">Baixar PNG</button><a id="testScenarioLink" class="note" target="_blank" rel="noopener" hidden>Testar cenário nesta prévia</a><p class="note" id="localShareNote" hidden>Prévia local: o link público abrirá o cenário depois que esta versão for publicada.</p><p class="note" id="cardMessage" aria-live="polite"></p></div></div>
@@ -371,7 +371,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
   <header class="top">
     <div class="meta">
       <span class="eyebrow">Simulador do Brasileirão 2026 · Athletico-PR</span>
-      <div class="brand"><svg class="crystal-ball brand-ball" viewBox="0 0 64 64" aria-hidden="true"><use href="#crystal-mark"></use></svg><h1>Bola de Cristal</h1></div>
+      <div class="brand"><svg class="crystal-ball brand-ball" viewBox="0 0 100 100" aria-hidden="true"><use href="#crystal-mark"></use></svg><h1>Bola de Cristal</h1></div>
       <div class="statusline" id="status"></div>
     </div>
     <div class="topctl">
@@ -395,7 +395,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
         <button type="button" data-lv="media" aria-pressed="false">Média<small>500 mil</small></button>
         <button type="button" data-lv="pesada" aria-pressed="false">Pesada<small>1 milhão</small></button>
       </div>
-      <span class="calc-orb" aria-hidden="true"><svg class="crystal-ball" viewBox="0 0 64 64"><use href="#crystal-mark"></use></svg></span>
+      <span class="calc-orb" aria-hidden="true"><svg class="crystal-ball" viewBox="0 0 100 100"><use href="#crystal-mark"></use></svg></span>
       <span class="lbl num" id="precInfo"></span>
     </div>
     </details>
@@ -1564,7 +1564,7 @@ function renderStatus(calc){
   $('#status').innerHTML =
     '<span class="chip"><b>'+PLAYED.length+'</b> jogos reais até a '+CUR_ROUND+'ª rodada</span>'+
     '<span class="chip"><b>'+n+'</b> palpites seus · <b>'+rem+'</b> em aberto</span>'+
-    '<span class="chip live'+(calc?' calc':'')+'"><svg class="crystal-ball status-ball" viewBox="0 0 64 64" aria-hidden="true"><use href="#crystal-mark"></use></svg>'+m+'</span>';
+    '<span class="chip live'+(calc?' calc':'')+'"><svg class="crystal-ball status-ball" viewBox="0 0 100 100" aria-hidden="true"><use href="#crystal-mark"></use></svg>'+m+'</span>';
   $('#precInfo').textContent = calc || !res ? '' : 'erro numérico ±'+fmt2.format(margin(res)*100)+' pp'+(timing[level] ? ' · '+fmt1.format(timing[level]/1000)+' s' : '');
 }
 
@@ -1907,16 +1907,20 @@ function css(v){ return getComputedStyle(document.documentElement).getPropertyVa
 let cardGenerating = false, generatedCard = null;
 function openCardDialog(){const dialog=$('#cardDialog');dialog.showModal();dialog.scrollTop=0;$('#btnCloseCard').focus({preventScroll:true});}
 function drawCrystal(ctx, x, y, size){
-  ctx.save(); ctx.translate(x,y); ctx.scale(size/64,size/64);
-  ctx.lineCap='round';ctx.lineJoin='round';
-  ctx.fillStyle='#e8eadd';ctx.strokeStyle='#4e6035';ctx.lineWidth=1.6;
-  ctx.beginPath();ctx.arc(32,26,21,0,Math.PI*2);ctx.fill();ctx.stroke();
-  ctx.globalAlpha=.15;ctx.fillStyle='#4e6035';ctx.beginPath();ctx.moveTo(32,18);ctx.lineTo(39.6,23.5);ctx.lineTo(36.7,32.5);ctx.lineTo(27.3,32.5);ctx.lineTo(24.4,23.5);ctx.closePath();ctx.fill();
-  ctx.globalAlpha=1;ctx.lineWidth=1.1;ctx.stroke();
-  ctx.globalAlpha=.55;ctx.lineWidth=1;ctx.beginPath();[[32,18,32,5],[39.6,23.5,52,19.5],[36.7,32.5,44.5,43],[27.3,32.5,19.5,43],[24.4,23.5,12,19.5]].forEach(p=>{ctx.moveTo(p[0],p[1]);ctx.lineTo(p[2],p[3]);});ctx.stroke();
-  ctx.globalAlpha=1;ctx.strokeStyle='#fffdf7';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(18,23);ctx.bezierCurveTo(19,17,23,13,29,11);ctx.stroke();
-  ctx.strokeStyle='#7a5636';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(20,48);ctx.bezierCurveTo(17,49,16,50,16,51);ctx.bezierCurveTo(16,53,23,55,32,55);ctx.bezierCurveTo(41,55,48,53,48,51);ctx.bezierCurveTo(48,50,47,49,44,48);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(21,54);ctx.lineTo(18,59);ctx.moveTo(43,54);ctx.lineTo(46,59);ctx.moveTo(13,60);ctx.lineTo(51,60);ctx.stroke();
+  ctx.save(); ctx.translate(x,y); ctx.scale(size/100,size/100);
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.fillStyle='#eee4c9'; ctx.strokeStyle='#3d4e2a'; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.arc(50,38,31,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#4e6035'; ctx.strokeStyle='#4e6035'; ctx.lineWidth=2.3;
+  const panel=new Path2D('M50 24 62 33 57.5 47H42.5L38 33Z');
+  ctx.fill(panel); ctx.stroke(panel);
+  ctx.stroke(new Path2D('M50 24V12m12 21 17-5M57.5 47l10 14m-25-14-10 14M38 33l-17-5'));
+  ctx.strokeStyle='#fffaf0'; ctx.lineWidth=4;
+  ctx.stroke(new Path2D('M28 28q4-10 14-13'));
+  ctx.fillStyle='#7a5636'; ctx.fill(new Path2D('M33 69h34l6 8H27Z'));
+  ctx.fillStyle='#503a29'; ctx.fill(new Path2D('M28 78h44l6 10H22Z'));
+  ctx.strokeStyle='#c99419'; ctx.lineWidth=2.5;
+  ctx.stroke(new Path2D('M30 80h40'));
   ctx.restore();
 }
 function drawClubDot(ctx, x, y, radius, colors){
