@@ -2080,7 +2080,14 @@ function paintStory(canvas, data){
   text(data.percent,76,946,238,800,ink,930);
   const label={z4:'de chance de queda',tit:'de chance de título',lib:'de chance de Libertadores',sula:'de chance de Sul-Americana'}[data.metric];
   text(label,88,1040,52,600,ink,904);
-  if(data.metric==='lib'||data.metric==='sula')text('Terminar do '+data.range+' lugar',88,1104,31,400,muted,904);
+  if(data.picks && data.basePct){
+    // efeito dos palpites: valor sem palpites e a diferença, em verde se ajudou o time e em terracota se piorou
+    const lead='Sem os seus palpites: '+data.basePct+'   ';
+    ctx.font='400 31px Montserrat, system-ui, sans-serif'; ctx.fillStyle=muted; ctx.fillText(lead,88,1104);
+    const w=ctx.measureText(lead).width;
+    ctx.font='700 31px Montserrat, system-ui, sans-serif'; ctx.fillStyle=data.deltaGood?moss:'#a3432b'; ctx.fillText(data.deltaTxt,88+w,1104);
+  }
+  else if(data.metric==='lib'||data.metric==='sula')text('Terminar do '+data.range+' lugar',88,1104,31,400,muted,904);
   else text('O futuro ainda está em jogo.',88,1104,31,400,muted);
   ctx.strokeStyle='#d0c5af';ctx.beginPath();ctx.moveTo(88,1180);ctx.lineTo(992,1180);ctx.stroke();
   // faixa de 100%: onde o time termina, por zona (cores fixas do tema claro)
@@ -2110,7 +2117,11 @@ $('#btnGenerateCard').addEventListener('click', async ()=>{
   if(generatedCard)URL.revokeObjectURL(generatedCard.downloadUrl);
   generatedCard=null;$('#cardPreview').removeAttribute('src');
   $('#btnDownloadCard').disabled=true;$('#btnCopyScenarioLink').disabled=true;$('#btnShareCard').hidden=true;$('#btnWhatsApp').removeAttribute('href');
-  const data={team:TEAMS[focus],colors:CLUB_COLORS[TEAMS[focus].c],metric,percent:$('#bigPct').textContent,code:curCode(),precision:level,picks:filled(),top:VAGAS.d+VAGAS.p,range:(()=>{const [a,b]=zoneRange(metric);return posTxt(a,b);})(),zones:zoneSegsOf(res,focus).map(z=>({n:z.n,v:z.v})),date:(DATA.asof.match(/\d{2}\/\d{2}\/\d{4}/)||[DATA.asof])[0]};
+  const data={team:TEAMS[focus],colors:CLUB_COLORS[TEAMS[focus].c],metric,percent:$('#bigPct').textContent,code:curCode(),precision:level,picks:filled(),top:VAGAS.d+VAGAS.p,range:(()=>{const [a,b]=zoneRange(metric);return posTxt(a,b);})(),zones:zoneSegsOf(res,focus).map(z=>({n:z.n,v:z.v})),...(()=>{ // efeito dos palpites: valor do mesmo indicador sem nenhum palpite
+      if(!filled()||!baseRes) return {basePct:null};
+      const D=MET[metric], p=D.prob(res)[focus], b=D.prob(baseRes)[focus], d=p-b, good=D.good ? d>=0 : d<=0;
+      return {basePct:pctTxt(b), deltaTxt:(Math.abs(d)<0.0005 ? 'sem mudança' : (d>0?'▲ ':'▼ ')+fmt1.format(Math.abs(d)*100)+' pp'), deltaGood:good};
+    })(),date:(DATA.asof.match(/\d{2}\/\d{2}\/\d{4}/)||[DATA.asof])[0]};
   try{
     if(document.fonts)await document.fonts.ready;
     const url=paintStory(document.createElement('canvas'),data), binary=atob(url.split(',')[1]);
@@ -2118,7 +2129,7 @@ $('#btnGenerateCard').addEventListener('click', async ()=>{
     const file=new File([blob],'bola-de-cristal-'+data.team.s+'-'+data.metric+'.png',{type:'image/png'});
     const link=scenarioLink(data.code,data.team.c,data.metric,data.precision);
     const description={z4:'de chance de queda',tit:'de chance de título',lib:'de chance de Libertadores',sula:'de chance de Sul-Americana'}[data.metric];
-    const message=data.team.n+' · '+data.percent+' '+description+'. Veja e teste meu cenário:\n'+link;
+    const message=data.team.n+' · '+data.percent+' '+description+(data.picks&&data.basePct?' (sem os meus palpites: '+data.basePct+')':'')+'. Veja e teste meu cenário:\n'+link;
     generatedCard={url,file,link,message,downloadUrl:URL.createObjectURL(blob)};
     $('#btnDownloadCard').disabled=false;$('#btnCopyScenarioLink').disabled=false;
     $('#cardPreview').src=url;$('#cardPreview').alt=data.team.n+' · '+data.percent+' '+MET[data.metric].noun+' · '+(data.picks?'com palpites':'sem palpites');
