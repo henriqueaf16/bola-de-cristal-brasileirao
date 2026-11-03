@@ -137,6 +137,14 @@ td.pos{font-weight:700;width:2.2em;text-align:center}
 tr.inz4 td.pos{color:var(--z4)}
 .team{display:flex;align-items:center;gap:8px}
 .code{font-family:var(--f-detail);font-weight:600;font-size:.74rem;letter-spacing:.05em;background:var(--surface-2);border-radius:5px;padding:1px 6px;min-width:3.3em;text-align:center}
+.club{background:var(--c1)!important;color:var(--fg)!important;box-shadow:inset 0 -3px 0 var(--c2)}
+.code.club{padding:1px 6px 3px}
+.club.lt{box-shadow:inset 0 -3px 0 var(--c2),inset 0 0 0 1px #c9bfa9}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .club.dk{box-shadow:inset 0 -3px 0 var(--c2),inset 0 0 0 1px #6a6455}}
+:root[data-theme="dark"] .club.dk{box-shadow:inset 0 -3px 0 var(--c2),inset 0 0 0 1px #6a6455}
+.score .tm.club{border-radius:6px;padding:2px 7px 4px;justify-self:start;font-size:.92rem}
+.score .tm.club:first-child{justify-self:end}
+.focus-name .code,.mc-pick .code{font-size:.85rem;padding:3px 8px 5px}
 .risk{display:flex;align-items:center;gap:8px;justify-content:flex-end;min-width:126px}
 .bar{flex:1;height:7px;border-radius:4px;background:var(--surface-2);overflow:hidden;min-width:48px;max-width:120px}
 .bar i{display:block;height:100%;background:var(--z4);border-radius:4px}
@@ -1399,10 +1407,17 @@ const CLUB_COLORS = {
   COR:['#242424','#f9f8f1'], INT:['#c52b32','#f9f8f1'], GRE:['#4c94d1','#f9f8f1','#242424'],
   REM:['#1b304e','#f9f8f1'], CHA:['#278751','#f9f8f1']
 };
-function clubDot(t){
-  const colors = CLUB_COLORS[t.c], stops = colors.map((c,i)=>c+' '+(i/colors.length*100)+'% '+((i+1)/colors.length*100)+'%').join(',');
-  return '<span class="club-dot" aria-hidden="true" style="background:linear-gradient(135deg,'+stops+')"></span>';
+/* Siglas nas cores do clube: fundo na cor principal, faixa embaixo na segunda cor (ou terceira, quando houver)
+   e letra na cor que der leitura. Caixas muito claras ganham contorno no tema claro; muito escuras, no tema escuro. */
+function lumHex(h){ const n = parseInt(h.slice(1),16), f = c => { c/=255; return c<=0.03928 ? c/12.92 : Math.pow((c+0.055)/1.055,2.4); }; return 0.2126*f(n>>16&255)+0.7152*f(n>>8&255)+0.0722*f(n&255); }
+function contrast(a,b){ const x = lumHex(a), y = lumHex(b); return (Math.max(x,y)+0.05)/(Math.min(x,y)+0.05); }
+function clubLook(t){
+  const c = CLUB_COLORS[t.c], c1 = c[0], c2 = c[2]||c[1];
+  const fg = contrast(c1,c[1])>=3 ? c[1] : (contrast(c1,'#ffffff')>contrast(c1,'#242424') ? '#ffffff' : '#242424');
+  const L = lumHex(c1), cls = ' club'+(L>0.8?' lt':'')+(L<0.03?' dk':'');
+  return {c1, c2, fg, cls, style:' style="--c1:'+c1+';--c2:'+c2+';--fg:'+fg+'"'};
 }
+function codeBox(t){ const k = clubLook(t); return '<span class="code'+k.cls+'"'+k.style+'>'+t.c+'</span>'; }
 
 /* ---------- jogos reais → tabela e ratings ---------- */
 const dayOf = md => Math.round(Date.UTC(2026,+md.slice(0,2)-1,+md.slice(2,4))/864e5);
@@ -1674,7 +1689,7 @@ function renderTable(){
       dCell = '<td class="delta '+(better?'down':worse?'up':'muted')+'">'+ppTxt(d)+'</td>'; }
     rows.push('<tr data-i="'+s.i+'" class="'+zoneClass(k)+(k>=16?' inz4':'')+(s.i===focus?' focus':'')+(s.i===myTeam?' mine':'')+'">'+
       '<td class="pos">'+(k+1)+'</td>'+
-      '<td class="l"><div class="team">'+clubDot(t)+'<span class="code">'+t.c+'</span><button type="button" class="tname team-focus" aria-label="Analisar '+t.n+'">'+t.n+'</button>'+mine+'</div></td>'+
+      '<td class="l"><div class="team">'+codeBox(t)+'<button type="button" class="tname team-focus" aria-label="Analisar '+t.n+'">'+t.n+'</button>'+mine+'</div></td>'+
       '<td><b>'+s.P+'</b></td><td class="hide-sm">'+s.J+'</td><td class="hide-sm">'+s.V+'</td><td class="hide-sm">'+(s.SG>0?'+':'')+s.SG+'</td>'+
       '<td class="hide-sm muted">'+fmt1.format(res.ptsMean[s.i])+'</td>'+
       '<td><div class="risk">'+(tag ? tag : '<span class="bar"><i style="width:'+(Math.min(p,1)*100).toFixed(1)+'%;background:var('+D.color+')"></i></span><span class="pct">'+pctCell+'</span>')+'</div></td>'+
@@ -1712,9 +1727,9 @@ function playedCards(){
     return '<div class="game played'+((p.h===focus||p.a===focus)?' hasfocus':'')+'">'+
       '<div class="when"><span>'+p.r+'ª rodada</span><span class="venue">encerrado</span></div>'+
       '<div class="score" aria-label="'+h.n+' '+p.gh+' x '+p.ga+' '+a.n+'">'+
-      '<span class="tm'+(p.gh>p.ga?' me':'')+'" title="'+h.n+'">'+h.c+'</span>'+
+      '<span class="tm'+(p.gh>p.ga?' me':'')+clubLook(h).cls+'"'+clubLook(h).style+' title="'+h.n+'">'+h.c+'</span>'+
       '<span class="sc fixed num">'+p.gh+'</span><span class="scx">x</span><span class="sc fixed num">'+p.ga+'</span>'+
-      '<span class="tm'+(p.ga>p.gh?' me':'')+'" title="'+a.n+'">'+a.c+'</span>'+
+      '<span class="tm'+(p.ga>p.gh?' me':'')+clubLook(a).cls+'"'+clubLook(a).style+' title="'+a.n+'">'+a.c+'</span>'+
       '</div><div class="pnames">'+h.n+' x '+a.n+'</div></div>';
   }).join('');
 }
@@ -1766,11 +1781,11 @@ function renderGames(){
     return '<div class="game'+((!team && (g.h===focus||g.a===focus))?' hasfocus':'')+(choice[i]?' filled':'')+'" data-g="'+i+'">'+
       '<div class="when"><span>'+whenTxt+'</span>'+venue+'</div>'+
       '<div class="score" data-i="'+i+'">'+
-      '<span class="tm'+(team&&g.h===focus?' me':'')+'" title="'+h.n+'">'+h.c+'</span>'+
+      '<span class="tm'+(team&&g.h===focus?' me':'')+clubLook(h).cls+'"'+clubLook(h).style+' title="'+h.n+'">'+h.c+'</span>'+
       '<input id="scH-'+i+'" class="sc" type="number" inputmode="numeric" min="0" max="'+MAXSC+'" step="1" value="'+vh+'" aria-label="Gols do '+h.n+'">'+
       '<span class="scx">x</span>'+
       '<input id="scA-'+i+'" class="sc" type="number" inputmode="numeric" min="0" max="'+MAXSC+'" step="1" value="'+va+'" aria-label="Gols do '+a.n+'">'+
-      '<span class="tm'+(team&&g.a===focus?' me':'')+'" title="'+a.n+'">'+a.c+'</span>'+
+      '<span class="tm'+(team&&g.a===focus?' me':'')+clubLook(a).cls+'"'+clubLook(a).style+' title="'+a.n+'">'+a.c+'</span>'+
       '</div>'+
       '<div class="odds num" title="Chances do modelo: vitória do mandante · empate · vitória do visitante"><span>'+pc(G.pH)+'</span><span>'+pc(G.pD)+'</span><span>'+pc(G.pA)+'</span>'+
       '<span class="pbar"><i style="width:'+(G.pH*100).toFixed(1)+'%"></i><i style="width:'+(G.pD*100).toFixed(1)+'%"></i><i style="width:'+(G.pA*100).toFixed(1)+'%"></i></span>'+
@@ -1942,7 +1957,7 @@ function ptsStats(t, r){
   return {med, lo, hi};
 }
 function renderFocus(){
-  $('#focusName').innerHTML = clubDot(TEAMS[focus])+TEAMS[focus].n;
+  $('#focusName').innerHTML = codeBox(TEAMS[focus])+TEAMS[focus].n;
   if (!res) return;
   const t = focus, D = MET[metric], p = D.prob(res)[t], se = D.se(res)[t];
   const st = buildState(choice,null,scH,scA);
@@ -2002,7 +2017,7 @@ function renderDecisive(){
   const good = MET[metric].good, cls = d => d>0.0005 ? (good?'down':'up') : d<-0.0005 ? (good?'up':'down') : 'muted';
   $('#dtbl tbody').innerHTML = rows.map(row=>{
     const h = TEAMS[row.g.h], a = TEAMS[row.g.a], own = row.g.h===t||row.g.a===t;
-    const label = '<span class="code">'+h.c+'</span> x <span class="code">'+a.c+'</span>';
+    const label = codeBox(h)+' x '+codeBox(a);
     if (row.fixed){ const c = choice[row.i]; const sc = scoreTxt(row.i); const txt = sc ? h.n+' '+sc+' '+a.n : (c===1?h.n+' vence':c===2?'Empate':a.n+' vence');
       return '<tr class="fixed'+(own?' own':'')+'"><td class="l g">'+label+'</td><td colspan="4" class="l">Palpite lançado: '+txt+'</td></tr>'; }
     const gc = res.gameCnt, tot = gc[row.i*3]+gc[row.i*3+1]+gc[row.i*3+2] || 1, po = [0,1,2].map(o=>gc[row.i*3+o]/tot);
@@ -2036,10 +2051,12 @@ function drawCrystal(ctx, x, y, size){
   ctx.stroke(new Path2D('M30 80h40'));
   ctx.restore();
 }
-function drawClubDot(ctx, x, y, radius, colors){
-  ctx.save(); ctx.translate(x,y); ctx.beginPath(); ctx.arc(0,0,radius,0,Math.PI*2); ctx.clip(); ctx.rotate(Math.PI/4);
-  colors.forEach((c,i)=>{ctx.fillStyle=c;ctx.fillRect(-radius+2*radius*i/colors.length,-radius,2*radius/colors.length+1,2*radius);});
-  ctx.restore(); ctx.strokeStyle='#b3ab9b'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(x,y,radius,0,Math.PI*2); ctx.stroke();
+function drawCodeBox(ctx, x, y, team){
+  const k = clubLook(team), w = 112, h = 50;
+  ctx.save(); ctx.beginPath(); ctx.roundRect(x,y,w,h,9); ctx.clip();
+  ctx.fillStyle = k.c1; ctx.fillRect(x,y,w,h); ctx.fillStyle = k.c2; ctx.fillRect(x,y+h-7,w,7); ctx.restore();
+  if (lumHex(k.c1)>0.8){ ctx.strokeStyle='#c9bfa9'; ctx.lineWidth=2; ctx.beginPath(); ctx.roundRect(x,y,w,h,9); ctx.stroke(); }
+  ctx.fillStyle = k.fg; ctx.font = '700 28px Montserrat, system-ui, sans-serif'; const tw = ctx.measureText(team.c).width; ctx.fillText(team.c, x+(w-tw)/2, y+34);
 }
 function paintStory(canvas, data){
   canvas.width=1080; canvas.height=1920;
@@ -2059,8 +2076,7 @@ function paintStory(canvas, data){
   ctx.strokeStyle='#d0c5af'; ctx.beginPath();ctx.moveTo(88,310);ctx.lineTo(992,310);ctx.stroke();
   drawCrystal(ctx,752,352,228);
   text('TIME EM FOCO',88,438,25,600,muted,630);
-  drawClubDot(ctx,111,490,20,data.colors);
-  text(data.team.c,151,501,29,600,muted,510);
+  drawCodeBox(ctx,88,462,data.team);
   text(data.team.n,88,612,80,800,ink,904);
   text(data.percent,76,946,238,800,ink,930);
   const label={z4:'de chance de queda',tit:'de chance de título',lib:'de chance de Libertadores',sula:'de chance de Sul-Americana'}[data.metric];
@@ -2267,7 +2283,7 @@ function renderAllTeams(){
   const order = standings(); let segs0 = null;
   $('#allBars').innerHTML = order.map((s,k)=>{ const segs = zoneSegsOf(res, s.i); if (!segs0) segs0 = segs; const t = TEAMS[s.i];
     return '<button type="button" class="allrow'+(s.i===focus?' focus':'')+'" data-i="'+s.i+'" aria-label="'+t.n+': '+segs.filter(x=>x.v>=0.0005).map(x=>x.n+' '+pctTxt(x.v)).join(', ')+'">'+
-      '<span class="ap num">'+(k+1)+'</span><span class="code">'+t.c+'</span><span class="an">'+t.n+'</span><span class="zonebar">'+zoneBarHTML(segs, 0.12)+'</span></button>'; }).join('');
+      '<span class="ap num">'+(k+1)+'</span>'+codeBox(t)+'<span class="an">'+t.n+'</span><span class="zonebar">'+zoneBarHTML(segs, 0.12)+'</span></button>'; }).join('');
   $('#allLeg').innerHTML = zoneLegHTML(segs0||[], 'names');
 }
 $('#allBars').addEventListener('click', e=>{ const b = e.target.closest('.allrow'); if (b) setFocus(+b.dataset.i); });
@@ -2413,7 +2429,7 @@ function renderMethod(){
   const pct = x => '±'+fmt0.format((Math.exp(x)-1)*100)+'%';
   const rows = TEAMS.map((t,i)=>({t, i, a:R.att[i], d:R.def[i], sa:sd(2+i), sdd:sd(22+i), pa:PRIOR.priorA[i], pd:PRIOR.priorD[i], prom:PRIOR.promoted.includes(t.n), gp:Math.exp(half+R.att[i]), gc:Math.exp(half-R.def[i])}))
     .sort((x,y)=>(y.gp-y.gc)-(x.gp-x.gc));
-  $('#mRatings tbody').innerHTML = rows.map(r=>'<tr><td class="l"><div class="team"><span class="code">'+r.t.c+'</span><span>'+r.t.n+'</span>'+(r.prom?'<span class="pill">promovido</span>':'')+'</div></td>'+
+  $('#mRatings tbody').innerHTML = rows.map(r=>'<tr><td class="l"><div class="team">'+codeBox(r.t)+'<span>'+r.t.n+'</span>'+(r.prom?'<span class="pill">promovido</span>':'')+'</div></td>'+
     '<td>'+fmt2.format(Math.exp(r.pa))+' / '+fmt2.format(Math.exp(-r.pd))+'</td>'+
     '<td><b>'+fmt2.format(Math.exp(r.a))+'</b> <small class="muted">'+pct(r.sa)+'</small></td><td><b>'+fmt2.format(Math.exp(-r.d))+'</b> <small class="muted">'+pct(r.sdd)+'</small></td>'+
     '<td>'+fmt2.format(r.gp)+'</td><td>'+fmt2.format(r.gc)+'</td><td>'+(r.gp-r.gc>=0?'+':'−')+fmt2.format(Math.abs(r.gp-r.gc))+'</td></tr>').join('');
@@ -2423,7 +2439,7 @@ function renderBench(){
   const vf = DATA.bench.vf;
   const rows = TEAMS.map((t,i)=>({t,i,us:baseRes.prob[i]*100, vf:vf[i], P:REAL[i].P})).filter(x=>x.us>0.05||x.vf>0.05).sort((a,b)=>b.us-a.us);
   $('#mBench tbody').innerHTML = rows.map(r=>{ const d = r.us-r.vf;
-    return '<tr><td class="l"><div class="team"><span class="code">'+r.t.c+'</span><span>'+r.t.n+'</span></div></td><td>'+r.P+'</td><td>'+fmt1.format(r.us)+'%</td><td>'+fmt1.format(r.vf)+'%</td><td class="'+(Math.abs(d)<0.05?'muted':'')+'">'+(d>=0?'+':'−')+fmt1.format(Math.abs(d))+' pp</td></tr>'; }).join('');
+    return '<tr><td class="l"><div class="team">'+codeBox(r.t)+'<span>'+r.t.n+'</span></div></td><td>'+r.P+'</td><td>'+fmt1.format(r.us)+'%</td><td>'+fmt1.format(r.vf)+'%</td><td class="'+(Math.abs(d)<0.05?'muted':'')+'">'+(d>=0?'+':'−')+fmt1.format(Math.abs(d))+' pp</td></tr>'; }).join('');
 }
 
 /* ---------- vistas ---------- */
@@ -2472,7 +2488,7 @@ function snapDate(s){ const m = s && /^(\d{2}\/\d{2})/.exec(s.asof||''); return 
 function cardTeam(){ return focus; }
 function renderMyCard(){
   const box = $('#mcBody'), t = cardTeam();
-  $('#mcDot').innerHTML = clubDot(TEAMS[t]); if ($('#selTeam').value!==String(t)) $('#selTeam').value = String(t);
+  $('#mcDot').innerHTML = codeBox(TEAMS[t]); if ($('#selTeam').value!==String(t)) $('#selTeam').value = String(t);
   if (!res){ box.innerHTML = ''; return; }
   const order = ['tit','lib','sula','z4'];
   let mets = order.filter(m=>{ const p = MET[m].prob(res)[t]; return p>0.001 && p<0.999; }).slice(0,3);
