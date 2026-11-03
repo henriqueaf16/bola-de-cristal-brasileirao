@@ -609,7 +609,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
 
       <section class="step"><span class="stepn">2</span><div>
         <h2>Lance seus palpites</h2>
-        <p>No quadro <b>Lance os resultados</b>, escolha a rodada nas abas e digite o placar nos dois campos de cada jogo, como numa tabela de rodada. As abas vão da 1ª à 38ª rodada: nas rodadas encerradas aparecem os placares reais, só para consulta. Para ver de uma vez todos os jogos que faltam para um clube, troque para <b>Jogos do time em foco</b>; a lista mostra a rodada, a data e se o jogo é em casa ou fora. Para desfazer, apague os dois campos. O placar conta nos pontos, nas vitórias e no saldo de gols.</p>
+        <p>No quadro <b>Lance os resultados</b>, escolha a rodada nas abas e digite o placar nos dois campos de cada jogo, como numa tabela de rodada. As abas vão da 1ª à 38ª rodada: nas rodadas encerradas aparecem os placares reais, só para consulta. Para ver de uma vez todos os jogos que faltam para um clube, troque para <b>Jogos do time em foco</b>; a lista mostra a rodada, a data e se o jogo é em casa ou fora. Para desfazer, apague o placar (basta um dos campos vazio). O placar conta nos pontos, nas vitórias e no saldo de gols.</p>
         <p>Embaixo de cada jogo aparecem as chances que o modelo dá a cada resultado e os gols esperados, para você comparar com o seu palpite.</p>
         <p>Prefere palpitar sem olhar a classificação? O botão <b>Esconder tabela</b>, no quadro dos jogos, tira a tabela da tela e deixa os jogos ocupando a largura toda; clique de novo em <b>Mostrar tabela</b> para trazê-la de volta. A escolha fica guardada no navegador.</p>
         <p class="note">Depois de cada palpite, a tabela recalcula sozinha. A coluna <b>Δ</b> mostra quanto a chance de cada time mudou em relação ao cenário sem palpites, e o painel do time em foco mostra a pontuação final provável com e sem os seus palpites.</p>
@@ -1810,8 +1810,8 @@ $('#games').addEventListener('input', e=>{
   const keep = choice[i] ? ' O palpite anterior continua valendo.' : '';
   fh.setAttribute('aria-invalid', String(x===null)); fa.setAttribute('aria-invalid', String(y===null));
   if (x===null || y===null){ hint.textContent = 'Use um número inteiro de 0 a '+MAXSC+'.'+keep; return; }
-  if (x==='' && y===''){ hint.textContent = ''; if (!choice[i]) return; clearScore(i); choice[i] = 0; }
-  else if (x==='' || y===''){ hint.textContent = 'Preencha os dois campos para lançar o palpite.'+keep; return; }
+  // um campo vazio (ou os dois): o jogo fica sem palpite, sem aviso; o palpite só conta com os dois gols preenchidos
+  if (x==='' || y===''){ hint.textContent = ''; if (!choice[i]) return; clearScore(i); choice[i] = 0; }
   else { hint.textContent = ''; if (scH[i]===x && scA[i]===y) return; scH[i]=x; scA[i]=y; choice[i]=outcomeOf(x,y); } card.classList.toggle('filled', !!choice[i]); const lg = card.querySelector('.legacy'); if (lg) lg.remove();
   softChanged();
 });
