@@ -339,6 +339,9 @@ details.howto[open] summary{margin-bottom:6px}
 .saved .it div{min-width:0}
 .toast{font-family:var(--f-detail);font-size:.84rem;color:var(--moss);min-height:1.2em}
 footer{font-family:var(--f-detail);font-size:.78rem;color:var(--muted)}
+footer .credit{margin:14px 0 0;padding-top:12px;border-top:1px solid var(--line);font-size:.82rem}
+footer .credit a{color:var(--moss);font-weight:600;text-decoration:none}
+footer .credit a:hover{text-decoration:underline}
 
 /* metodologia */
 .doc{display:grid;grid-template-columns:220px minmax(0,1fr);gap:32px;align-items:start}
@@ -593,6 +596,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
   </section>
   <footer>Modelo de Poisson com ataque e defesa, prior da temporada 2025, peso no tempo, correção de Dixon-Coles e incerteza dos parâmetros (versão 3, 26/10/2026). Placares de 2026: dados abertos do ValorFinal, origem football-data.org, atualizados em <span class="asof"></span>. Detalhes, fórmulas e referências na aba Metodologia.
     <nav class="teamlinks" aria-label="Página de cada time"><span>Página de cada time:</span> <a href="https://boladecristal.app.br/athletico-pr/">Athletico-PR</a> <a href="https://boladecristal.app.br/atletico-mg/">Atlético-MG</a> <a href="https://boladecristal.app.br/bahia/">Bahia</a> <a href="https://boladecristal.app.br/botafogo/">Botafogo</a> <a href="https://boladecristal.app.br/bragantino/">Bragantino</a> <a href="https://boladecristal.app.br/chapecoense/">Chapecoense</a> <a href="https://boladecristal.app.br/corinthians/">Corinthians</a> <a href="https://boladecristal.app.br/coritiba/">Coritiba</a> <a href="https://boladecristal.app.br/cruzeiro/">Cruzeiro</a> <a href="https://boladecristal.app.br/flamengo/">Flamengo</a> <a href="https://boladecristal.app.br/fluminense/">Fluminense</a> <a href="https://boladecristal.app.br/gremio/">Grêmio</a> <a href="https://boladecristal.app.br/internacional/">Internacional</a> <a href="https://boladecristal.app.br/mirassol/">Mirassol</a> <a href="https://boladecristal.app.br/palmeiras/">Palmeiras</a> <a href="https://boladecristal.app.br/remo/">Remo</a> <a href="https://boladecristal.app.br/santos/">Santos</a> <a href="https://boladecristal.app.br/sao-paulo/">São Paulo</a> <a href="https://boladecristal.app.br/vasco/">Vasco</a> <a href="https://boladecristal.app.br/vitoria/">Vitória</a></nav>
+    <p class="credit">Feito por Henrique Fernandes · Contato e novidades no X: <a href="https://x.com/boladecristalbr" target="_blank" rel="noopener">@boladecristalbr</a></p>
   </footer>
   </div>
 
@@ -1439,7 +1443,7 @@ const FRESH = E.freshPack(RATINGS); // parâmetros sorteados de novo em cada cam
 const GRIDS = UNI.grids; // grades preditivas (média sobre a incerteza dos parâmetros)
 
 let level = 'leve';
-try { const v = localStorage.getItem(LV_KEY); if (v && LEVELS[v]) level = v; } catch(e){}
+// a página sempre abre na precisão leve, para a tabela aparecer rápido; o visitante pode subir a precisão depois
 let choice = new Int8Array(OPEN.length); // 0 vazio, 1 mandante, 2 empate, 3 visitante
 let scH = new Int8Array(OPEN.length).fill(-1), scA = new Int8Array(OPEN.length).fill(-1); // placar palpitado (−1 = sem placar)
 const MAXSC = 15;
@@ -1501,7 +1505,7 @@ function useSharedScenario(shared){
   if(!shared||shared.invalid)return false;
   const d=shared.decoded;
   choice=d.ch;scH=d.sh;scA=d.sa;VAGAS=d.vagas||{...VAGAS_DEF};
-  focus=shared.team;metric=shared.metric;level=shared.level;
+  focus=shared.team;metric=shared.metric; // a precisão do link é ignorada: a página sempre abre na leve
   return true;
 }
 function outcomeOf(x,y){ return x>y?1:x===y?2:3; }
@@ -1836,7 +1840,7 @@ $('#btnResetAll').addEventListener('click', ()=>{
 function renderPrec(){ document.querySelectorAll('#prec button').forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.lv===level))); }
 $('#prec').addEventListener('click', e=>{
   const b = e.target.closest('button[data-lv]'); if (!b || b.dataset.lv===level) return;
-  level = b.dataset.lv; try{ localStorage.setItem(LV_KEY, level); }catch(err){}
+  level = b.dataset.lv;
   renderPrec(); baseRes = null; evoCache.clear(); startJob();
 });
 
