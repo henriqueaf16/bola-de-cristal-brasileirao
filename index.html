@@ -1459,7 +1459,7 @@ const evoCache = new Map(), timing = {};
 
 /* ---------- datas ---------- */
 function fmtWhen(g){
-  if (g.r===21) return 'Adiado, data a definir';
+  if (g.r===21 && !g.c) return 'Adiado, data a definir';
   const mo = +g.d.slice(0,2)-1, da = +g.d.slice(2,4), hh = +g.d.slice(5,7), mi = +g.d.slice(7,9);
   if (!g.c){ const dt = new Date(Date.UTC(2026,mo,da)); return WD[dt.getUTCDay()]+' '+String(da).padStart(2,'0')+'/'+String(mo+1).padStart(2,'0')+' · horário a confirmar'; }
   const dt = new Date(Date.UTC(2026,mo,da,hh,mi) - 3*3600e3);
@@ -1742,7 +1742,7 @@ function scoreTxt(i){ return scH[i]>=0 ? scH[i]+' x '+scA[i] : ''; }
 /* Súmula no estilo das tabelas de rodada: data e hora, mandante [placar] x [placar] visitante,
    e abaixo as chances do modelo (mandante · empate · visitante) e os gols esperados. */
 function shortWhen(g){
-  if (g.r===21) return 'adiado · data a definir';
+  if (g.r===21) return g.c ? 'adiado · '+fmtWhen(g) : 'adiado · data a definir';
   return fmtWhen(g).replace(' · horário a confirmar',' · a confirmar');
 }
 /* Lista de jogos: por rodada (abas) ou todos os jogos restantes do time em foco. */
@@ -1751,7 +1751,7 @@ let gMode = 'round';
 try { const v = localStorage.getItem(GM_KEY); if (v==='round' || v==='team') gMode = v; } catch(e){}
 function teamGames(t){
   return OPEN.map((g,i)=>({g,i})).filter(x=>x.g.h===t || x.g.a===t)
-    .sort((x,y)=>(x.g.r===21)-(y.g.r===21) || x.g.d.localeCompare(y.g.d));
+    .sort((x,y)=>(x.g.r===21&&!x.g.c)-(y.g.r===21&&!y.g.c) || x.g.d.localeCompare(y.g.d));
 }
 function listedGames(){ return gMode==='team' ? teamGames(focus) : roundGames(curRound).sort((x,y)=>x.g.d.localeCompare(y.g.d)); }
 function renderGamesHead(){
@@ -1779,7 +1779,7 @@ function renderGames(){
     const vh = scH[i]>=0 ? scH[i] : '', va = scA[i]>=0 ? scA[i] : '';
     const legacy = choice[i] && scH[i]<0; // palpite antigo só com resultado
     const lg = legacy ? '<div class="legacy">palpite sem placar: '+(choice[i]===1?h.n+' vence':choice[i]===2?'empate':a.n+' vence')+' · digite o placar ou <button type="button" class="linkbtn" data-clear="'+i+'">apague</button></div>' : '';
-    const whenTxt = team ? (g.r===21 ? 'adiado da 21ª · data a definir' : g.r+'ª rodada · '+shortWhen(g)) : shortWhen(g);
+    const whenTxt = team ? (g.r===21 ? 'adiado da 21ª · '+(g.c ? fmtWhen(g) : 'data a definir') : g.r+'ª rodada · '+shortWhen(g)) : shortWhen(g);
     const venue = team ? '<span class="venue">'+(g.h===focus?'em casa':'fora')+'</span>' : '';
     return '<div class="game'+((!team && (g.h===focus||g.a===focus))?' hasfocus':'')+(choice[i]?' filled':'')+'" data-g="'+i+'">'+
       '<div class="when"><span>'+whenTxt+'</span>'+venue+'</div>'+
