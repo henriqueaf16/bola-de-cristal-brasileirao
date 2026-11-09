@@ -250,6 +250,12 @@ details.adv[open] summary{margin-bottom:8px}
 .score .scx{font-family:var(--f-detail);font-size:.8rem;color:var(--muted);text-align:center}
 .odds{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;font-family:var(--f-detail);font-size:.74rem;color:var(--muted);text-align:center}
 .odds .xg{grid-column:1/-1;text-align:center}
+.odds.quick{gap:6px}
+.qk{display:flex;align-items:center;justify-content:center;gap:6px;min-height:36px;border:0;border-radius:8px;background:var(--surface);color:var(--muted);font:inherit;font-family:var(--f-detail);cursor:pointer;padding:4px 6px}
+.qk b{color:var(--ink);font-weight:700;letter-spacing:.02em}
+.qk:hover{box-shadow:inset 0 0 0 1px var(--line)}
+.qk[aria-pressed="true"]{background:var(--moss);color:#fff}.qk[aria-pressed="true"] b{color:#fff}
+@media (max-width:560px){.qk{min-height:44px}}
 .pbar{display:flex;height:4px;border-radius:2px;overflow:hidden;grid-column:1/-1}
 .pbar i:nth-child(1){background:var(--moss)} .pbar i:nth-child(2){background:var(--yellow)} .pbar i:nth-child(3){background:var(--brown)}
 
@@ -515,7 +521,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
       </div>
       <div class="tabs" role="tablist" id="tabs"></div>
       <div class="games" id="games"></div>
-      <p class="note">Veja os jogos por rodada ou todos os jogos que faltam para um time. Nas rodadas já disputadas, as abas mostram os placares reais. Digite o placar nos dois campos de um jogo para lançar o palpite; apague os dois para desfazer. Jogos com palpite ficam destacados. Abaixo de cada jogo, as chances que o modelo dá para vitória do mandante, empate e vitória do visitante, e os gols esperados.</p>
+      <p class="note">Veja os jogos por rodada ou todos os jogos que faltam para um time. Nas rodadas já disputadas, as abas mostram os placares reais. Digite o placar nos dois campos de um jogo, ou toque direto no resultado (mandante, empate ou visitante) para um palpite rápido; nele o placar é sorteado entre os compatíveis com o resultado. Toque de novo ou apague os campos para desfazer. Jogos com palpite ficam destacados. Abaixo de cada jogo, as chances que o modelo dá para vitória do mandante, empate e vitória do visitante, e os gols esperados.</p>
     </section>
   </div>
 
@@ -1790,14 +1796,20 @@ function renderGames(){
       '<input id="scA-'+i+'" class="sc" type="number" inputmode="numeric" min="0" max="'+MAXSC+'" step="1" value="'+va+'" aria-label="Gols do '+a.n+'">'+
       '<span class="tm'+(team&&g.a===focus?' me':'')+clubLook(a).cls+'"'+clubLook(a).style+' title="'+a.n+'">'+a.c+'</span>'+
       '</div>'+
-      '<div class="odds num" title="Chances do modelo: vitória do mandante · empate · vitória do visitante"><span>'+pc(G.pH)+'</span><span>'+pc(G.pD)+'</span><span>'+pc(G.pA)+'</span>'+
-      '<span class="pbar"><i style="width:'+(G.pH*100).toFixed(1)+'%"></i><i style="width:'+(G.pD*100).toFixed(1)+'%"></i><i style="width:'+(G.pA*100).toFixed(1)+'%"></i></span>'+
-      '<span class="xg">gols esperados '+fmt1.format(G.lh)+' x '+fmt1.format(G.la)+'</span></div>'+lg+
+      '<div class="odds num quick" role="group" aria-label="Palpite rápido: toque no resultado">'+
+      [[1,h.c,G.pH,h.n+' vence'],[2,'E',G.pD,'empate'],[3,a.c,G.pA,a.n+' vence']].map(([k,l,p,n])=>'<button type="button" class="qk" data-q="'+k+'" data-gi="'+i+'" aria-pressed="'+(choice[i]===k)+'" aria-label="Palpite: '+n+' ('+pc(p)+' no modelo)"><b>'+l+'</b><span>'+pc(p)+'</span></button>').join('')+
+      '<span class="xg">gols esperados '+fmt1.format(G.lh)+' x '+fmt1.format(G.la)+(legacy?' · placar sorteado':'')+'</span></div>'+
       '<div class="score-hint" aria-live="polite"></div>'+
       '</div>';
   }).join('') + (team ? '' : playedCards());
 }
 function clearScore(i){ scH[i] = -1; scA[i] = -1; }
+/* Palpite rápido: tocar no resultado lança só o resultado (o placar é sorteado entre os compatíveis); tocar de novo desfaz. */
+$('#games').addEventListener('click', e=>{
+  const q = e.target.closest('.qk'); if(!q) return;
+  const i = +q.dataset.gi, k = +q.dataset.q;
+  clearScore(i); choice[i] = choice[i]===k ? 0 : k; track('palpite/rapido'); changed();
+});
 $('#games').addEventListener('click', e=>{
   const b = e.target.closest('[data-clear]'); if(!b) return;
   const i = +b.dataset.clear; choice[i] = 0; clearScore(i); changed();
