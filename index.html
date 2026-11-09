@@ -2625,7 +2625,11 @@ const TOUR = [
   {sel:'#tblPanel', t:'Classificação projetada', d:'A chance de cada clube terminar campeão, na Libertadores, na Sul-Americana ou rebaixado. Troque a aba para mudar o que a tabela mostra; a coluna Δ diz quanto seus palpites mexeram.'},
   {sel:'#games .game', t:'Seus palpites', d:'Toque na chance do resultado para um palpite rápido, ou digite o placar exato. A tabela recalcula na hora. Toque de novo para desfazer.'},
   {sel:'#gMode', t:'Rodada ou time', d:'Veja os jogos rodada a rodada, ou só os próximos jogos de um time específico.'},
-  {sel:'#foco', t:'Time em foco', d:'A chance do seu time em detalhe: como ela mudou rodada a rodada, quantos pontos ele precisa e quais jogos da rodada mais mexem com ela.'},
+  {sel:'#foco .focus-head', t:'Time em foco', d:'A chance do seu time em detalhe. Escolha o que analisar: rebaixamento, Sul-Americana, Libertadores ou título. Ao lado, os pontos de hoje e a pontuação final provável.'},
+  {sel:'#foco .cards > .wide', t:'Evolução rodada a rodada', d:'Como a chance do time mudou a cada rodada do campeonato. Marque "mostrar os outros times na briga" para comparar com os rivais diretos.'},
+  {sel:'#foco .cards > div:nth-child(2)', t:'Jogos decisivos', d:'Para cada jogo da rodada, a chance do seu time se o mandante vencer, se empatar ou se o visitante vencer. O impacto é a diferença entre o melhor e o pior cenário: quanto maior, mais o jogo importa, mesmo sem o seu time em campo.'},
+  {sel:'#foco .cards > div:nth-child(3)', t:'Classificação final projetada', d:'Em "Time em foco", a chance de terminar em cada posição. Em "Por pontuação", quantos pontos garantem o título ou livram da queda. Em "Todos os times", a projeção do campeonato inteiro.'},
+  {sel:'#btnGenerateCard', t:'Gerar card', d:'Monte uma imagem pronta para o story ou o WhatsApp com a chance do seu time e os seus palpites. O link do cenário vai junto, para os amigos abrirem a mesma simulação.'},
   {sel:'#vagasBox', t:'Vagas continentais', d:'Quer simular um G8? Aqui você escolhe quantas vagas vão para a Libertadores e para a Sul-Americana.'}
 ];
 let tourI = -1, tourEl = null, tourTip = null;
