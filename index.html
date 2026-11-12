@@ -106,6 +106,9 @@ a{color:var(--moss);text-underline-offset:2px}
 @media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
 .panel{background:var(--surface);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:12px;min-width:0}
 .panel-head{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;justify-content:space-between}
+/* Tabela: o seletor fica sempre na linha de baixo, para não pular de lugar quando o título muda de tamanho */
+#tblPanel .panel-head h2{flex-basis:100%}
+#tblPanel .panel-head{justify-content:flex-start}
 
 /* tabela: sem linhas, zebra leve e faixa de Z4 tingida */
 .tablewrap{overflow-x:auto;margin-inline:-4px}
