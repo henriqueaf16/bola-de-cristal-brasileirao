@@ -106,6 +106,9 @@ a{color:var(--moss);text-underline-offset:2px}
 @media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
 .panel{background:var(--surface);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:12px;min-width:0}
 .panel-head{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;justify-content:space-between}
+/* Tabela: o seletor fica sempre na linha de baixo, para não pular de lugar quando o título muda de tamanho */
+#tblPanel .panel-head h2{flex-basis:100%}
+#tblPanel .panel-head{justify-content:flex-start}
 
 /* tabela: sem linhas, zebra leve e faixa de Z4 tingida */
 .tablewrap{overflow-x:auto;margin-inline:-4px}
@@ -156,6 +159,15 @@ tr.inz4 td.pos{color:var(--z4)}
 .score-hint:empty{display:none}
 @media (max-width:560px){.score .sc{min-width:44px;min-height:44px}.seg3 button,.btn{min-height:40px}}
 .delta{font-family:var(--f-detail);font-size:.8rem;min-width:4.5em}
+/* Últimos jogos: cheio = resultado real, vazado = palpite */
+th.form-h{text-align:center}
+td.form{white-space:nowrap;text-align:center}
+.fd{position:relative;display:inline-block;width:9px;height:9px;border-radius:50%;margin:0 2px;vertical-align:middle;background:var(--fc);border:2px solid var(--fc);box-sizing:border-box}
+.fd.w{--fc:var(--good)} .fd.d{--fc:var(--muted)} .fd.l{--fc:var(--z4)}
+.fd.d{opacity:.55}
+.fd.pp{background:transparent}
+.fd::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);right:-6px;white-space:pre;font-family:var(--f-detail);font-size:.74rem;line-height:1.35;text-align:left;background:var(--ink);color:var(--surface);padding:5px 8px;border-radius:6px;opacity:0;pointer-events:none;transition:opacity .12s;z-index:5}
+.fd:hover::after,.fd:focus::after{opacity:1}
 .up{color:var(--z4)} .down{color:var(--good)}
 .tag{font-family:var(--f-detail);font-weight:600;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;border-radius:4px;padding:1px 6px}
 .tag.salvo{background:var(--moss-soft);color:var(--good)}
@@ -508,7 +520,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
       </div>
       <div class="legend"><span class="zleg"><i style="background:var(--c-tit)"></i>Título</span><span class="zleg"><i style="background:var(--c-lib)"></i>Libertadores (grupos)</span><span class="zleg" id="legPre"><i style="background:var(--c-pre)"></i>Pré-Libertadores</span><span class="zleg"><i style="background:var(--c-sula)"></i>Sul-Americana</span><span class="zleg"><i style="background:var(--z4)"></i>Rebaixamento</span><span class="muted">Faixas pela posição atual · clique num time para analisá-lo</span></div>
       <div class="tablewrap"><table id="tbl">
-        <thead><tr><th class="l">#</th><th class="l">Time</th><th>P</th><th class="hide-sm">J</th><th class="hide-sm">V</th><th class="hide-sm" title="Saldo de gols dos jogos reais">SG</th><th class="hide-sm" title="Pontuação final média nas simulações">Proj.</th><th id="thMet">Queda</th><th id="thDelta" title="Diferença para o cenário sem palpites">Δ</th></tr></thead>
+        <thead><tr><th class="l">#</th><th class="l">Time</th><th>P</th><th class="hide-sm">J</th><th class="hide-sm">V</th><th class="hide-sm" title="Saldo de gols dos jogos reais">SG</th><th class="hide-sm" title="Pontuação final média nas simulações">Proj.</th><th id="thMet">Queda</th><th id="thDelta" title="Diferença para o cenário sem palpites">Δ</th><th class="hide-sm form-h" title="Últimos 5 jogos, do mais antigo ao mais recente. Pontos vazados são palpites seus.">Últ. jogos</th></tr></thead>
         <tbody></tbody>
       </table></div>
       <p class="note">P, J e V somam os jogos reais e os resultados que você lançou. SG soma os jogos reais e os placares que você digitou. Proj. é a pontuação final média nas simulações.</p>
@@ -1686,6 +1698,28 @@ function statusNow(){ const st = buildState(choice,null,scH,scA); return E.mathS
 /* Faixa de zona pela posição atual: 1º título, Libertadores, Sul-Americana e Z4, com as vagas configuradas. */
 // faixas: título (1º), Libertadores fase de grupos, pré-Libertadores (fase preliminar), Sul-Americana, rebaixamento
 function zoneClass(k){ const [,lb] = zoneRange('lib'), [,gb] = zoneRange('libd'), [sa,sb] = zoneRange('sula'); return k===0 ? 'zt' : k<=gb ? 'zl' : k<=lb ? 'zp' : (k>=sa && k<=sb) ? 'zs' : k>=16 ? 'zz' : ''; }
+/* Últimos 5 jogos do time: jogos reais e palpites lançados, em ordem de data. Atualiza a cada palpite. */
+function lastGames(t, n){
+  const L = [];
+  PLAYED.forEach(g=>{ if (g.h!==t && g.a!==t) return; const home = g.h===t, gf = home?g.gh:g.ga, ga = home?g.ga:g.gh;
+    L.push({k:g.md+'T0000', r:g.r, home, opp:home?g.a:g.h, gf, ga, res: gf>ga?1:gf===ga?0:-1, real:true}); });
+  OPEN.forEach((g,i)=>{ if (!choice[i] || (g.h!==t && g.a!==t)) return; const home = g.h===t;
+    const hasSc = scH[i]>=0, gf = hasSc?(home?scH[i]:scA[i]):null, ga = hasSc?(home?scA[i]:scH[i]):null;
+    const c = choice[i], res = c===2 ? 0 : ((c===1)===home ? 1 : -1);
+    L.push({k:g.d, r:g.r, home, opp:home?g.a:g.h, gf, ga, res, real:false}); });
+  return L.sort((x,y)=>x.k<y.k?-1:x.k>y.k?1:0).slice(-n);
+}
+function formCell(t){
+  return lastGames(t,5).map(g=>{
+    const me = TEAMS[t].n, op = TEAMS[g.opp].n;
+    const jogo = g.home ? me+' '+(g.gf!=null?g.gf:'')+' x '+(g.ga!=null?g.ga:'')+' '+op : op+' '+(g.ga!=null?g.ga:'')+' x '+(g.gf!=null?g.gf:'')+' '+me;
+    const tipo = g.real ? 'Resultado real' : 'Seu palpite';
+    const sem = g.gf==null ? ' · '+(g.res>0?me+' vence':g.res<0?op+' vence':'empate') : '';
+    const tip = g.r+'ª rodada · '+tipo+'\n'+jogo.replace(/\s+/g,' ')+sem;
+    const cl = g.res>0?'w':g.res<0?'l':'d';
+    return '<i class="fd '+cl+(g.real?'':' pp')+'" tabindex="0" data-tip="'+tip+'" aria-label="'+tip.replace('\n',': ')+'"></i>';
+  }).join('');
+}
 function renderTable(){
   $('#legPre').hidden = !VAGAS.p;
   const D = MET[metric], P = D.prob(res), B = baseRes ? D.prob(baseRes) : null;
@@ -1703,7 +1737,7 @@ function renderTable(){
     if (msT && msT[s.i]==='garantido'){ tag = '<span class="tag garantido">'+(metric==='tit'?'campeão':'garantido')+'</span>'; pctCell = '100%'; }
     else if (msT && msT[s.i]==='fora') pctCell = '0%';
     const mine = s.i===myTeam ? '<span class="mydot" role="img" aria-label="seu time" title="seu time"></span>' : '';
-    if (k===16) rows.push('<tr class="z4gap" aria-hidden="true"><td colspan="9"></td></tr>');
+    if (k===16) rows.push('<tr class="z4gap" aria-hidden="true"><td colspan="10"></td></tr>');
     let dCell = '';
     if (hasDelta){ const d = p - B[s.i], better = D.good ? d>0.0005 : d<-0.0005, worse = D.good ? d<-0.0005 : d>0.0005;
       dCell = '<td class="delta '+(better?'down':worse?'up':'muted')+'">'+ppTxt(d)+'</td>'; }
@@ -1713,7 +1747,7 @@ function renderTable(){
       '<td><b>'+s.P+'</b></td><td class="hide-sm">'+s.J+'</td><td class="hide-sm">'+s.V+'</td><td class="hide-sm">'+(s.SG>0?'+':'')+s.SG+'</td>'+
       '<td class="hide-sm muted">'+fmt1.format(res.ptsMean[s.i])+'</td>'+
       '<td><div class="risk">'+(tag ? tag : '<span class="bar"><i style="width:'+(Math.min(p,1)*100).toFixed(1)+'%;background:var('+D.color+')"></i></span><span class="pct">'+pctCell+'</span>')+'</div></td>'+
-      dCell+'</tr>');
+      dCell+'<td class="hide-sm form">'+formCell(s.i)+'</td></tr>');
   });
   $('#tbl tbody').innerHTML = rows.join('');
 }
