@@ -302,6 +302,11 @@ details.adv[open] summary{margin-bottom:8px}
 .vagas label{display:inline-flex;align-items:center;gap:6px;color:var(--muted)}
 .vagas input{width:3.2em;font:inherit;font-weight:700;text-align:center;border:0;border-radius:7px;padding:4px;background:var(--surface);color:var(--ink);font-variant-numeric:tabular-nums}
 .vagas .vg-info{flex-basis:100%;color:var(--muted);font-size:.78rem}
+.vagas.garant .vg-title{flex-basis:100%}
+.ga-list{display:flex;flex-direction:column;gap:6px;flex-basis:100%}
+.ga-list:empty{display:none}
+.ga-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px}
+.ga-team{display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--ink);min-width:9em}
 .seg3.metric{align-self:flex-start;margin-top:4px;flex-wrap:wrap;border-radius:18px}
 .seg3.metric button{padding:6px 14px}
 .facts{display:flex;flex-wrap:wrap;gap:8px 24px;font-size:.88rem}
@@ -504,6 +509,12 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
       <button class="btn" id="vgReset" type="button" hidden>Voltar ao padrão (4 + 1 + 6)</button>
       <span class="vg-info" id="vgInfo" aria-live="polite"></span>
     </div>
+    <div class="vagas garant" role="group" aria-labelledby="gaTitle">
+      <span class="vg-title" id="gaTitle">Vagas já garantidas</span>
+      <div class="ga-list" id="gaList"></div>
+      <select id="gaAdd" aria-label="Adicionar time com vaga garantida"></select>
+      <span class="vg-info" id="gaInfo" aria-live="polite"></span>
+    </div>
   </details>
   <div class="toast" id="migrMsg" aria-live="polite" hidden></div>
 
@@ -660,7 +671,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
 
       <section class="step"><span class="stepn">4</span><div>
         <h2>Ajuste as vagas, se quiser</h2>
-        <p>Abra a seção <b>Vagas continentais</b>, logo abaixo das opções avançadas, e mude quantos clubes vão à fase de grupos e à fase preliminar da Libertadores e quantos vão à Sul-Americana. O padrão de 2026 é 4 + 1 + 6. Útil quando um campeão de copa abre vaga extra pela tabela.</p>
+        <p>Abra a seção <b>Vagas continentais</b>, logo abaixo das opções avançadas, e mude quantos clubes vão à fase de grupos e à fase preliminar da Libertadores e quantos vão à Sul-Americana. O padrão de 2026 é 4 + 1 + 6. Em <b>Vagas já garantidas</b> você marca os clubes que já têm vaga na Libertadores por outra competição (por exemplo, campeão da Copa do Brasil ou da Sul-Americana), na fase de grupos ou na preliminar. Se um deles terminar numa posição de vaga, ela passa para o próximo da tabela. A opção "perde se cair" devolve a vaga à tabela quando o clube é rebaixado.</p>
       </div></section>
 
       <section class="step"><span class="stepn">5</span><div>
@@ -805,7 +816,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
           <h2><span class="n">9</span>O que o site calcula</h2>
           <ul>
             <li><b>Chance de queda</b>: média do indicador de rebaixamento de cada time nas <em>N</em> simulações.</li>
-            <li><b>Título, Libertadores e Sul-Americana</b>: fração das simulações em que o time termina em 1º (título), do 1º ao 5º (Libertadores: quatro vagas na fase de grupos e uma na fase preliminar) ou do 6º ao 11º (Sul-Americana), conforme a distribuição de vagas da temporada 2026<sup class="ref"><a href="#r17">[17]</a></sup>. O número de vagas pode ser alterado na seção Vagas continentais, abaixo das opções avançadas (fase de grupos, fase preliminar e Sul-Americana); a mudança vale para a tabela e para todo o painel do time em foco, inclusive o histórico, que guarda a distribuição de posição final de cada time em cada rodada e por isso pode ser relido com qualquer configuração. Com fase preliminar, o painel da Libertadores separa a chance de fase de grupos e a de fase preliminar. Vagas extras abertas quando um clube brasileiro vence a Copa do Brasil, a Libertadores ou a Sul-Americana não são consideradas. Um empate na fronteira de uma zona divide as vagas igualmente. No painel do time em foco você escolhe a métrica, e todos os gráficos e tabelas do painel passam a usá-la.</li>
+            <li><b>Título, Libertadores e Sul-Americana</b>: fração das simulações em que o time termina em 1º (título), do 1º ao 5º (Libertadores: quatro vagas na fase de grupos e uma na fase preliminar) ou do 6º ao 11º (Sul-Americana), conforme a distribuição de vagas da temporada 2026<sup class="ref"><a href="#r17">[17]</a></sup>. O número de vagas pode ser alterado na seção Vagas continentais, abaixo das opções avançadas (fase de grupos, fase preliminar e Sul-Americana); a mudança vale para a tabela e para todo o painel do time em foco, inclusive o histórico, que guarda a distribuição de posição final de cada time em cada rodada e por isso pode ser relido com qualquer configuração. Com fase preliminar, o painel da Libertadores separa a chance de fase de grupos e a de fase preliminar. Por padrão, vagas extras abertas quando um clube brasileiro vence a Copa do Brasil, a Libertadores ou a Sul-Americana não são consideradas. Em Vagas já garantidas é possível marcar esses clubes: em cada campeonato simulado a tabela é percorrida de cima para baixo, quem já tem vaga não ocupa vaga da tabela, que desce para o próximo clube sem vaga (inclusive as da Sul-Americana); se a vaga da tabela for melhor que a garantida, o clube fica com a da tabela e a garantida desce; e uma vaga marcada como "perde se cair" volta para a tabela quando o clube termina entre os quatro últimos. Nesse modo, empates em todos os critérios seguem a ordem do sorteio, e as chances de Libertadores e Sul-Americana da tabela e do painel consideram a redistribuição, mas o gráfico de posição final, as faixas por zona e a evolução por rodada continuam pela posição. Um empate na fronteira de uma zona divide as vagas igualmente. No painel do time em foco você escolhe a métrica, e todos os gráficos e tabelas do painel passam a usá-la.</li>
             <li><b>Pontuação final provável</b>: mediana da pontuação final simulada, com a faixa central de 80% (percentis 10 e 90): em 80% dos campeonatos simulados o time termina dentro dela.</li>
             <li><b>Rebaixamento por pontuação</b>: para cada pontuação final <em>k</em>, a fração dos times que caíram entre todos os que terminaram com <em>k</em> pontos, somando os 20 clubes de todas as simulações: P(cair | terminar com <em>k</em> pontos), a mesma leitura da tabela por pontuação da UFMG<sup class="ref"><a href="#r8">[8]</a></sup>.</li>
             <li><b>Jogos decisivos</b>: as simulações são separadas pelo resultado sorteado em cada jogo e a chance de queda é recalculada em cada grupo. Cada coluna é P(cair | resultado), por isso as três não somam 100%; ponderadas pela chance de cada resultado, dão a chance de queda atual (lei da probabilidade total). O impacto é a diferença entre o maior e o menor valor. O ValorFinal usa a mesma separação no seu índice de impacto<sup class="ref"><a href="#r9">[9]</a></sup>.</li>
@@ -892,7 +903,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
           <ul>
             <li><b>Prior simples.</b> Usa só os gols da temporada anterior. Contratações, troca de técnico e valor de elenco não entram; promovidos recebem a média dos rebaixados, sem distinguir quem subiu forte.</li>
             <li><b>Mando de campo único.</b> Mesmo <em>γ</em> para todos os clubes e estádios, sem ajuste para clássicos no mesmo estádio ou distância de viagem.</li>
-            <li><b>Vagas continentais fixas.</b> Libertadores e Sul-Americana usam as posições-padrão (1º ao 5º e 6º ao 11º). Se campeões de copas abrirem vagas extras pela tabela, a chance real de classificação de quem fica logo abaixo é maior que a mostrada.</li>
+            <li><b>Vagas continentais fixas por padrão.</b> Libertadores e Sul-Americana usam as posições-padrão (1º ao 5º e 6º ao 11º). Se campeões de copas abrirem vagas extras pela tabela e eles não forem marcados em Vagas já garantidas, a chance real de classificação de quem fica logo abaixo é maior que a mostrada.</li>
             <li><b>Desempate incompleto.</b> Confronto direto, cartões e sorteio não entram (seção 8).</li>
             <li><b>Faixa intermediária.</b> No backtest, previsões entre 30% e 70% saíram um pouco acima do observado. A diferença está dentro do ruído amostral, mas vale acompanhar.</li>
             <li><b>Sem dados de desempenho.</b> O modelo vê gols, não chances criadas (xG), que são mais estáveis que o placar.</li>
@@ -1162,11 +1173,36 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
        tit  título           1º         [0, 0]
        lib  Libertadores     1º a 5º    [0, 4]  (4 na fase de grupos + 1 na fase preliminar)
        sula Sul-Americana    6º a 11º   [5, 10]
-     Vagas extras (campeões de Copa do Brasil, Libertadores e Sul-Americana) não são consideradas.
+     Vagas extras (campeões de Copa do Brasil, Libertadores e Sul-Americana): ver allocSlots (opts.garant).
      Um grupo empatado que atravessa a fronteira de uma zona divide as vagas igualmente. */
   var ZONES = [['z4', 16, 19], ['tit', 0, 0], ['lib', 0, 4], ['libd', 0, 3], ['sula', 5, 10]];
   /* Zonas a partir do número de vagas: d = Libertadores fase de grupos, p = fase preliminar, s = Sul-Americana. */
   function zonesFor(d, p, s) { return [['z4', 16, 19], ['tit', 0, 0], ['lib', 0, d + p - 1], ['libd', 0, d - 1], ['sula', d + p, d + p + s - 1]]; }
+  /* Vagas já garantidas por outras competições (Copa do Brasil, Libertadores, Sul-Americana).
+     garant[t]: 0 nenhuma; 1 Libertadores fase de grupos; 2 fase preliminar; 3 e 4 = 1 e 2, mas a vaga se perde
+     se o time for rebaixado (e passa a ser disputada pela tabela). Em cada campeonato simulado a tabela é
+     percorrida de cima para baixo: quem já tem vaga não ocupa vaga da tabela, que desce para o próximo; se a vaga
+     da tabela for melhor que a garantida (grupos × preliminar), o time fica com a da tabela e a garantida desce.
+     Preenche wL (Libertadores), wD (fase de grupos) e wS (Sul-Americana) com 0/1. */
+  function allocSlots(order, d, p, s, garant, wL, wD, wS) {
+    var cD = d, cP = p, cS = s, t, i, g;
+    for (t = 0; t < NT; t++) { wL[t] = 0; wD[t] = 0; wS[t] = 0; }
+    for (i = 0; i < NT; i++) { t = order[i]; g = garant[t];
+      if (g >= 3 && i >= 16) { if (g === 3) cD++; else cP++; } }
+    for (i = 0; i < NT; i++) {
+      t = order[i]; g = garant[t];
+      var own = g && !(g >= 3 && i >= 16) ? (g === 1 || g === 3 ? 1 : 2) : 0;
+      if (own) {
+        if (own === 2 && cD > 0) { cD--; cP++; wL[t] = 1; wD[t] = 1; }   // fica com a de grupos; a preliminar desce
+        else { wL[t] = 1; if (own === 1) wD[t] = 1; }
+        continue;
+      }
+      if (i >= 16) break;
+      if (cD > 0) { cD--; wL[t] = 1; wD[t] = 1; }
+      else if (cP > 0) { cP--; wL[t] = 1; }
+      else if (cS > 0) { cS--; wS[t] = 1; }
+    }
+  }
   function rankTable(pts, wins, gd, gf, order, key) {
     var i, j, t;
     // critérios comparados um a um (pontos, vitórias, saldo, gols pró), sem chave compactada com limites de faixa
@@ -1209,7 +1245,9 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
       return { name: z[0], from: z[1], to: z[2], w: new Float64Array(NT), prob: new Float64Array(NT), prob2: new Float64Array(NT),
         pts: new Float64Array(NT * MAXP), game: new Float64Array(G * 3 * NT) };
     });
-    var hs = new Int32Array(G), as = new Int32Array(G), fx = new Int8Array(G), g, t, i, zi;
+    var GA = null, gaL = new Float64Array(NT), gaD = new Float64Array(NT), gaS = new Float64Array(NT);
+    if (opts.garant && opts.slots && opts.garant.some(function (x) { return x; })) GA = opts.garant;
+        var hs = new Int32Array(G), as = new Int32Array(G), fx = new Int8Array(G), g, t, i, zi;
     var sx = new Int16Array(G), sy = new Int16Array(G);
     for (g = 0; g < G; g++) {
       hs[g] = open[g].h; as[g] = open[g].a; fx[g] = open[g].fix || 0;
@@ -1305,7 +1343,11 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
         }
         for (zi = 0; zi < Z.length; zi++) {
           var z = Z[zi], w = z.w, nn = 0;
-          zoneWeights(order, key, z.from, z.to, w);
+          if (GA && (z.name === 'lib' || z.name === 'libd' || z.name === 'sula')) {
+            if (z.name === 'lib') allocSlots(order, opts.slots.d, opts.slots.p, opts.slots.s, GA, gaL, gaD, gaS);
+            var src = z.name === 'lib' ? gaL : z.name === 'libd' ? gaD : gaS;
+            for (t = 0; t < NT; t++) w[t] = src[t];
+          } else zoneWeights(order, key, z.from, z.to, w);
           for (t = 0; t < NT; t++) if (w[t] > 0) {
             var pp = pts[t] < MAXP ? pts[t] : MAXP - 1;
             z.prob[t] += w[t]; z.prob2[t] += w[t] * w[t]; z.pts[t * MAXP + pp] += w[t]; nz[nn++] = t;
@@ -1405,7 +1447,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
   }
 
   var api = { fitRatings: fitRatings, covariance: covariance, expectedGoals: expectedGoals, matchGrid: matchGrid, gridP: gridP,
-    buildUniverses: buildUniverses, pointGrids: pointGrids, createSim: createSim, simulate: simulate, mathStatus: mathStatus, mathTitle: mathTitle, mathTop: mathTop, ZONES: ZONES, zonesFor: zonesFor, freshPack: freshPack,
+    buildUniverses: buildUniverses, pointGrids: pointGrids, createSim: createSim, simulate: simulate, mathStatus: mathStatus, mathTitle: mathTitle, mathTop: mathTop, ZONES: ZONES, zonesFor: zonesFor, allocSlots: allocSlots, freshPack: freshPack,
     seasonPrior: seasonPrior, hashStr: hashStr, mulberry32: mulberry32, NT: NT, MAXP: MAXP, MAXG: MAXG };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.BrasEngine = api;
 })(this);
@@ -1510,7 +1552,7 @@ const CODE_PREFIX = DATA.codePrefix;
 function encode(ch, sh, sa){
   let sc = '';
   if (sh) for (let i=0;i<ch.length;i++) if (sh[i]>=0 && ch[i]) sc += B64[i]+B64[sh[i]]+B64[sa[i]];
-  return CODE_PREFIX+'-'+pack(ch)+(sc?'.'+sc:'')+(vagasDefault()?'':'~'+B64[VAGAS.d]+B64[VAGAS.p]+B64[VAGAS.s]);
+  return CODE_PREFIX+'-'+pack(ch)+(sc?'.'+sc:'')+(vagasNumDefault()?'':'~'+B64[VAGAS.d]+B64[VAGAS.p]+B64[VAGAS.s])+(GARANT.some(x=>x)?'!'+GARANT.map((g,t)=>g?B64[t]+B64[g]:'').join(''):'');
 }
 function curCode(){ return encode(choice, scH, scA); }
 function scenarioLink(code, team, objective, precision, origin='https://boladecristal.app.br'){
@@ -1532,7 +1574,7 @@ function readSharedScenario(){
 function useSharedScenario(shared){
   if(!shared||shared.invalid)return false;
   const d=shared.decoded;
-  choice=d.ch;scH=d.sh;scA=d.sa;VAGAS=d.vagas||{...VAGAS_DEF};
+  choice=d.ch;scH=d.sh;scA=d.sa;VAGAS=d.vagas||{...VAGAS_DEF};GARANT=d.garant||new Array(NT).fill(0);
   focus=shared.team;metric=shared.metric; // a precisão do link é ignorada: a página sempre abre na leve
   return true;
 }
@@ -1541,7 +1583,7 @@ const PAIR_IDX = new Map(OPEN.map((g,i)=>[g.h+'-'+g.a, i]));
 function decode(code){
   code = (code||'').trim();
   const emptyH = ()=>new Int8Array(OPEN.length).fill(-1);
-  let m = code.match(/^(Z4[A-Z])-([A-Za-z0-9_-]*)(?:\.([A-Za-z0-9_-]*))?(?:~([A-Za-z0-9_-]{3}))?$/);
+  let m = code.match(/^(Z4[A-Z])-([A-Za-z0-9_-]*)(?:\.([A-Za-z0-9_-]*))?(?:~([A-Za-z0-9_-]{3}))?(?:!([A-Za-z0-9_-]*))?$/);
   if (m){
     const list = m[1]===CODE_PREFIX ? null : DATA.lists[m[1]];
     if (m[1]!==CODE_PREFIX && !list) return null;
@@ -1556,10 +1598,13 @@ function decode(code){
     }
     let vagas = null;
     if (m[4]){ vagas = {d:B64.indexOf(m[4][0]), p:B64.indexOf(m[4][1]), s:B64.indexOf(m[4][2])}; if (!validVagas(vagas)) return null; }
-    if (!list) return {ch:d0, sh:sh0, sa:sa0, vagas, dropped:0, legacy:false};
+    let garant = null;
+    if (m[5]){ if (m[5].length % 2) return null; garant = new Array(NT).fill(0);
+      for (let k=0;k<m[5].length;k+=2){ const t = B64.indexOf(m[5][k]), g = B64.indexOf(m[5][k+1]); if (t<0||t>=NT||g<1||g>4) return null; garant[t] = g; } }
+    if (!list) return {ch:d0, sh:sh0, sa:sa0, vagas, garant, dropped:0, legacy:false};
     const ch = new Int8Array(OPEN.length), sh = emptyH(), sa = emptyH(); let dropped = 0;
     list.forEach((p,i)=>{ if (!d0[i]) return; const j = PAIR_IDX.get(p[0]+'-'+p[1]); if (j==null){ dropped++; return; } ch[j] = d0[i]; sh[j] = sh0[i]; sa[j] = sa0[i]; });
-    return {ch, sh, sa, vagas, dropped, legacy:true};
+    return {ch, sh, sa, vagas, garant, dropped, legacy:true};
   }
   m = code.match(/^Z4-([A-Za-z0-9_-]*)$/);
   if (m){
@@ -1574,7 +1619,7 @@ function save(){ try{ localStorage.setItem(STORE_KEY, curCode()); }catch(e){} }
 function load(){
   try{
     const c = localStorage.getItem(STORE_KEY); const d = c && decode(c);
-    if (d){ choice = d.ch; scH = d.sh; scA = d.sa; if (d.vagas) VAGAS = d.vagas;
+    if (d){ choice = d.ch; scH = d.sh; scA = d.sa; if (d.vagas) VAGAS = d.vagas; if (d.garant) GARANT = d.garant;
       if (d.legacy && d.dropped){ save(); const el = $('#migrMsg'); el.hidden = false; el.textContent = 'Os dados foram atualizados com jogos que já aconteceram. Mantive '+filledOf(d.ch)+' palpites seus e descartei '+d.dropped+' de jogos que agora têm resultado real.'; }
       return; }
     const o = localStorage.getItem(OLD_KEY); const od = o && decode(o);
@@ -1632,7 +1677,7 @@ function startJob(){
       if (ti >= tasks.length){ job = null; finish(); return; }
       task = tasks[ti++];
       const st = buildState(task.ch, null, task.sh, task.sa);
-      sim = E.createSim(st.base, st.open, {seed: seedFor(scenKey(task.ch, task.sh, task.sa, null)), fresh:FRESH, zones:zonesNow()});
+      sim = E.createSim(st.base, st.open, {seed: seedFor(scenKey(task.ch, task.sh, task.sa, null)), fresh:FRESH, zones:zonesNow(), garant:GARANT, slots:VAGAS});
       t0 = performance.now(); lastPaint = 0;
     }
     const tA = performance.now();
@@ -1903,12 +1948,18 @@ $('#prec').addEventListener('click', e=>{
 /* ---------- vagas continentais configuráveis ---------- */
 const VAGAS_DEF = {d:4, p:1, s:6}, VAGAS_KEY = 'z4sim-vagas';
 let VAGAS = {...VAGAS_DEF};
+/* Vagas já garantidas por outras competições: 0 nenhuma, 1 grupos, 2 preliminar, 3/4 = 1/2 mas perde se cair. */
+const GARANT_KEY = 'bc-garantidas';
+let GARANT = new Array(NT).fill(0);
+try { const v = JSON.parse(localStorage.getItem(GARANT_KEY)||'null'); if (Array.isArray(v) && v.length===NT && v.every(x=>Number.isInteger(x)&&x>=0&&x<=4)) GARANT = v; } catch(e){}
 try { const v = JSON.parse(localStorage.getItem(VAGAS_KEY)||'null'); if (v && validVagas(v)) VAGAS = {d:+v.d, p:+v.p, s:+v.s}; } catch(e){}
 function validVagas(v){ const d=+v.d, p=+v.p, s=+v.s; return [d,p,s].every(Number.isInteger) && d>=1 && d<=8 && p>=0 && p<=4 && s>=0 && s<=10 && d+p+s<=16; }
 function zoneRange(k){ const L = VAGAS.d+VAGAS.p; return k==='z4'?[16,19]:k==='tit'?[0,0]:k==='lib'?[0,L-1]:k==='libd'?[0,VAGAS.d-1]:[L, L+VAGAS.s-1]; }
 function zonesNow(){ return E.zonesFor(VAGAS.d, VAGAS.p, VAGAS.s); }
 function posTxt(a,b){ return a===b ? (a+1)+'º' : (a+1)+'º ao '+(b+1)+'º'; }
-function vagasDefault(){ return VAGAS.d===VAGAS_DEF.d && VAGAS.p===VAGAS_DEF.p && VAGAS.s===VAGAS_DEF.s; }
+function vagasNumDefault(){ return VAGAS.d===VAGAS_DEF.d && VAGAS.p===VAGAS_DEF.p && VAGAS.s===VAGAS_DEF.s; }
+function vagasDefault(){ return vagasNumDefault() && !GARANT.some(x=>x); }
+function garantOn(){ return GARANT.some(x=>x); }
 /* Chance de zona a partir da distribuição de posição final (usada no histórico e na evolução). */
 function zoneFromPos(pos, k){ const [a,b] = zoneRange(k), out = new Array(NT).fill(0); for (let t=0;t<NT;t++) for (let q=a;q<=b;q++) out[t] += pos[t*NT+q]; return out; }
 
@@ -1938,8 +1989,25 @@ function renderVagas(){
   $('#vgD').value = VAGAS.d; $('#vgP').value = VAGAS.p; $('#vgS').value = VAGAS.s;
   const L = VAGAS.d+VAGAS.p, [sa, sb] = zoneRange('sula');
   $('#vgInfo').textContent = 'Libertadores: '+posTxt(0, L-1)+(VAGAS.p?' ('+posTxt(0,VAGAS.d-1)+' na fase de grupos, '+posTxt(VAGAS.d, L-1)+' na preliminar)':'')+' · Sul-Americana: '+(sb<sa?'sem vagas':posTxt(sa, sb))+(vagasDefault()?' · padrão de 2026':'');
-  $('#vgReset').hidden = vagasDefault();
-  $('#vgSum').textContent = VAGAS.d+' + '+VAGAS.p+' + '+VAGAS.s+(vagasDefault() ? ' · padrão de 2026' : ' · alterado');
+  $('#vgReset').hidden = vagasNumDefault();
+  const ng = GARANT.filter(x=>x).length;
+  $('#vgSum').textContent = VAGAS.d+' + '+VAGAS.p+' + '+VAGAS.s+(vagasNumDefault() ? ' · padrão de 2026' : ' · alterado')+(ng ? ' · '+ng+(ng>1?' times':' time')+' com vaga garantida' : '');
+  renderGarant();
+}
+const G_LBL = ['Sem vaga garantida','Libertadores · grupos','Libertadores · preliminar','Libertadores · grupos (perde se cair)','Libertadores · preliminar (perde se cair)'];
+function renderGarant(){
+  const list = $('#gaList'); if (!list) return;
+  const opt = (v,l,cur)=>'<option value="'+v+'"'+(v===cur?' selected':'')+'>'+l+'</option>';
+  const rows = TEAMS.map((tm,t)=>({tm,t})).filter(x=>GARANT[x.t]);
+  list.innerHTML = rows.map(({tm,t})=>'<div class="ga-row"><span class="ga-team">'+codeBox(tm)+tm.n+'</span><select data-t="'+t+'" aria-label="Vaga garantida de '+tm.n+'">'+G_LBL.map((l,v)=>opt(v,v?l:'Remover',GARANT[t])).join('')+'</select></div>').join('');
+  $('#gaAdd').innerHTML = '<option value="">+ Time com vaga garantida…</option>'+TEAMS.map((tm,t)=>GARANT[t]?'':'<option value="'+t+'">'+tm.n+'</option>').join('');
+  $('#gaInfo').textContent = rows.length ? 'Se um desses times terminar numa posição de vaga, ela passa para o próximo da tabela. Vaga marcada como "perde se cair" volta para a tabela se o time for rebaixado.' : 'Ex.: campeão da Copa do Brasil ou da Sul-Americana. Escolha o time e o tipo de vaga.';
+}
+function saveGarant(){ try { localStorage.setItem(GARANT_KEY, JSON.stringify(GARANT)); } catch(e){} }
+function setGarant(t, g){
+  GARANT = GARANT.slice(); GARANT[t] = g; saveGarant();
+  renderVagas(); evoCache.clear(); baseRes = null;
+  save(); $('#codeOut').value = curCode(); startJob();
 }
 /* seção de vagas: fechada por padrão; lembra se a pessoa deixou aberta */
 const VG_OPEN_KEY = 'bc-vagas-aberto';
@@ -1959,6 +2027,8 @@ $('#vagas').addEventListener('change', e=>{
   if (!setVagas(v)){ $('#vgInfo').textContent = 'Combinação inválida: fase de grupos de 1 a 8, preliminar de 0 a 4, Sul-Americana de 0 a 10, e no máximo 16 vagas no total (o 17º já é zona de rebaixamento).'; }
 });
 $('#vgReset').addEventListener('click', ()=>setVagas({...VAGAS_DEF}));
+$('#gaAdd').addEventListener('change', e=>{ const t = e.target.value; if (t==='') return; setGarant(+t, 1); });
+$('#gaList').addEventListener('change', e=>{ const sel = e.target.closest('select[data-t]'); if (sel) setGarant(+sel.dataset.t, +sel.value); });
 function pickMetric(e){
   const b = e.target.closest('button[data-m]'); if (!b || b.dataset.m===metric) return;
   metric = b.dataset.m; try{ localStorage.setItem(MET_KEY, metric); }catch(err){}
@@ -2033,7 +2103,7 @@ function renderFocus(){
   } else {
     big.style.color = 'var('+MET[metric].color+')';
     const k = metric==='tit' ? 1 : metric==='lib' ? VAGAS.d+VAGAS.p : 0;
-    const ms = k ? E.mathTop(st.shown, st.free, k)[t] : null;
+    const ms = k && !(metric==='lib' && garantOn()) ? E.mathTop(st.shown, st.free, k)[t] : null;
     big.textContent = ms==='garantido' ? '100%' : ms==='fora' ? '0%' : pctTxt(p);
     const names = {tit:['campeão matematicamente','sem chance matemática de título','chance de título'], lib:['vaga na Libertadores garantida matematicamente','sem chance matemática de Libertadores','chance de Libertadores'], sula:['','','chance de Sul-Americana']}[metric];
     lbl.textContent = ms==='garantido' ? names[0] : ms==='fora' ? names[1] : names[2]+tail;
@@ -2285,7 +2355,7 @@ const PV_NOTES = {
 function renderPtsTabs(){
   document.querySelectorAll('#ptsTabs button').forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.pv===ptsView)));
   $('#pvTeam').hidden = ptsView!=='team'; $('#pvPts').hidden = ptsView!=='pts'; $('#pvAll').hidden = ptsView!=='all';
-  $('#ptsNote').textContent = PV_NOTES[ptsView]+(metric==='lib'||metric==='sula'||ptsView!=='pts'?' Vagas extras abertas por campeões de Copa do Brasil, Libertadores ou Sul-Americana não são consideradas.':'');
+  $('#ptsNote').textContent = PV_NOTES[ptsView]+(metric==='lib'||metric==='sula'||ptsView!=='pts'?(garantOn()?' As vagas já garantidas marcadas estão consideradas.':' Vagas extras abertas por campeões de Copa do Brasil, Libertadores ou Sul-Americana não são consideradas.'):'');
 }
 $('#ptsTabs').addEventListener('click', e=>{ const b = e.target.closest('button[data-pv]'); if (!b || b.dataset.pv===ptsView) return;
   ptsView = b.dataset.pv; try { localStorage.setItem(PV_KEY, ptsView); } catch(e){} renderPoints(); });
@@ -2380,7 +2450,7 @@ function evoWork(){
     const key = scenKey(choice, scH, scA, r);
     if (evoCache.has(key) || key===curCode()) continue;
     const m = maskState(choice, scH, scA, r), st = buildState(m.ch, null, m.sh, m.sa);
-    const rr = E.simulate(st.base, st.open, {n:N_EVO, seed:E.hashStr(key+'|evo'), fresh:FRESH, zones:zonesNow()});
+    const rr = E.simulate(st.base, st.open, {n:N_EVO, seed:E.hashStr(key+'|evo'), fresh:FRESH, zones:zonesNow(), garant:GARANT, slots:VAGAS});
     evoCache.set(key, Array.from(rr.pos));
     renderEvo();
     evoTimer = setTimeout(evoWork, 10);
@@ -2442,7 +2512,7 @@ $('#btnCopy').addEventListener('click', copyCode);
 $('#btnShareTop').addEventListener('click', ()=>{ $('#cenarios').scrollIntoView({behavior:'smooth',block:'start'}); copyCode(); });
 function applyLoaded(d, name){
   choice = d.ch; scH = d.sh; scA = d.sa; curRound = nextRound(); decRound = null;
-  setVagas(d.vagas || {...VAGAS_DEF}, true); changed();
+  GARANT = d.garant || new Array(NT).fill(0); saveGarant(); setVagas(d.vagas || {...VAGAS_DEF}, true); changed();
   return (name?name+': ':'')+filledOf(d.ch)+' palpites carregados'+(d.dropped?'; '+d.dropped+' descartados porque o jogo já aconteceu de verdade':'')+'.';
 }
 $('#btnLoad').addEventListener('click', ()=>{
@@ -2701,6 +2771,5 @@ if (!tourSeen() && !(sharedAtStart&&!sharedAtStart.invalid)){
 })();
 
 </script>
-
 <script data-goatcounter="https://henriquef16.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body></html>
