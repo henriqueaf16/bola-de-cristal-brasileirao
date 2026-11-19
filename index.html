@@ -1378,6 +1378,13 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
   function simulate(base, open, opts) { var s = createSim(base, open, opts); s.run((opts && opts.n) || 50000); return s.result(); }
 
   /* Status matemático (condição suficiente, só pontos). */
+  /* Critério de desempate nº 1 é o número de vitórias. Quem empata em pontos fazendo o máximo possível
+     ganhou todos os jogos restantes, então termina com vitórias + jogos restantes. */
+  function wn(base, t) { return base.wins ? base.wins[t] : 0; }
+  function surelyBelow(base, rem, u, t) { // u termina atrás de t mesmo vencendo tudo (t sem somar mais nada)
+    var mu = base.pts[u] + 3 * rem[u];
+    return mu < base.pts[t] || (base.wins && mu === base.pts[t] && wn(base, u) + rem[u] < wn(base, t));
+  }
   function mathStatus(base, open) {
     var rem = new Int32Array(NT), t, u;
     for (var g = 0; g < open.length; g++) { rem[open[g].h]++; rem[open[g].a]++; }
@@ -1386,8 +1393,8 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
       var maxT = base.pts[t] + 3 * rem[t], below = 0, above = 0;
       for (u = 0; u < NT; u++) {
         if (u === t) continue;
-        if (base.pts[u] + 3 * rem[u] < base.pts[t]) below++;
-        if (base.pts[u] > maxT) above++;
+        if (surelyBelow(base, rem, u, t)) below++;
+        if (surelyBelow(base, rem, t, u)) above++;
       }
       st.push(below >= 4 ? 'salvo' : above >= 16 ? 'rebaixado' : null);
     }
@@ -1403,8 +1410,8 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
       var champ = true, out = false, maxT = base.pts[t] + 3 * rem[t];
       for (u = 0; u < NT; u++) {
         if (u === t) continue;
-        if (base.pts[u] + 3 * rem[u] >= base.pts[t]) champ = false;
-        if (base.pts[u] > maxT) out = true;
+        if (!surelyBelow(base, rem, u, t)) champ = false;
+        if (surelyBelow(base, rem, t, u)) out = true;
       }
       st.push(champ ? 'campeao' : out ? 'fora' : null);
     }
@@ -1422,8 +1429,8 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
       var reach = 0, above = 0, maxT = base.pts[t] + 3 * rem[t];
       for (u = 0; u < NT; u++) {
         if (u === t) continue;
-        if (base.pts[u] + 3 * rem[u] >= base.pts[t]) reach++;
-        if (base.pts[u] > maxT) above++;
+        if (!surelyBelow(base, rem, u, t)) reach++;
+        if (surelyBelow(base, rem, t, u)) above++;
       }
       st.push(reach <= k - 1 ? 'garantido' : above >= k ? 'fora' : null);
     }
