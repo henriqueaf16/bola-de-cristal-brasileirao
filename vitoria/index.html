@@ -1388,9 +1388,9 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
     if (!base.wins || mu > base.pts[t]) return false;
     var wu = wn(base, u) + rem[u], wt = wn(base, t);
     if (wu !== wt) return wu < wt;
-    /* Empate em pontos e vitórias: saldo e gols pró só são certos se nenhum dos dois joga mais
-       (com jogo pela frente, o placar pode mudar o saldo sem limite). */
-    if (rem[u] || rem[t] || !base.gd) return false;
+    /* Empate em pontos e vitórias: saldo e gols pró só são certos se nenhum dos dois joga mais e todos os
+       palpites dos dois têm placar (com placar em aberto, o saldo pode mudar sem limite). */
+    if (rem[u] || rem[t] || !base.gd || (base.gdOpen && (base.gdOpen[u] || base.gdOpen[t]))) return false;
     if (base.gd[u] !== base.gd[t]) return base.gd[u] < base.gd[t];
     return !!base.gf && base.gf[u] < base.gf[t];
   }
@@ -1656,20 +1656,21 @@ function inScope(i, maxRound){ return maxRound==null || OPEN[i].r<=maxRound || O
 function buildState(ch, maxRound, sh, sa){
   const pts = REAL.map(t=>t.P), wins = REAL.map(t=>t.V), J = REAL.map(t=>t.J);
   const gd = REAL.map(t=>t.GP-t.GC), gf = REAL.map(t=>t.GP);
-  const sgd = gd.slice(), sgf = gf.slice();
+  const sgd = gd.slice(), sgf = gf.slice(), gdOpen = new Array(NT).fill(0); // jogos com palpite sem placar
   const open = [], free = [];
   OPEN.forEach((g,i)=>{
     const c = inScope(i, maxRound) ? ch[i] : 0;
     const hasSc = c && sh && sh[i]>=0;
     open.push(hasSc ? {h:g.h, a:g.a, grid:GRIDS[i], fix:c, gh:sh[i], ga:sa[i]} : {h:g.h, a:g.a, grid:GRIDS[i], fix:c});
     if (!c){ free.push({h:g.h, a:g.a}); return; }
+    if (!hasSc){ gdOpen[g.h]++; gdOpen[g.a]++; }
     if (hasSc){ sgd[g.h] += sh[i]-sa[i]; sgd[g.a] += sa[i]-sh[i]; sgf[g.h] += sh[i]; sgf[g.a] += sa[i]; }
     J[g.h]++; J[g.a]++;
     if (c===1){ pts[g.h]+=3; wins[g.h]++; }
     else if (c===2){ pts[g.h]++; pts[g.a]++; }
     else { pts[g.a]+=3; wins[g.a]++; }
   });
-  return {base:{pts:REAL.map(t=>t.P), wins:REAL.map(t=>t.V), gd, gf}, shown:{pts, wins, J, gd:sgd, gf:sgf}, open, free};
+  return {base:{pts:REAL.map(t=>t.P), wins:REAL.map(t=>t.V), gd, gf}, shown:{pts, wins, J, gd:sgd, gf:sgf, gdOpen}, open, free};
 }
 function maskState(ch, sh, sa, maxRound){
   if (maxRound==null) return {ch, sh, sa};
