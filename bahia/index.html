@@ -531,7 +531,7 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
           <button type="button" data-m="z4" aria-pressed="true">Queda</button>
         </div>
       </div>
-      <div class="legend"><span class="zleg"><i style="background:var(--c-tit)"></i>Título</span><span class="zleg"><i style="background:var(--c-lib)"></i>Libertadores (grupos)</span><span class="zleg" id="legPre"><i style="background:var(--c-pre)"></i>Pré-Libertadores</span><span class="zleg"><i style="background:var(--c-sula)"></i>Sul-Americana</span><span class="zleg"><i style="background:var(--z4)"></i>Rebaixamento</span><span class="muted">Faixas pela posição atual · clique num time para analisá-lo</span></div>
+      <div class="legend"><span class="zleg"><i style="background:var(--c-tit)"></i>Título</span><span class="zleg"><i style="background:var(--c-lib)"></i>Libertadores (grupos)</span><span class="zleg" id="legPre"><i style="background:var(--c-pre)"></i>Pré-Libertadores</span><span class="zleg"><i style="background:var(--c-sula)"></i>Sul-Americana</span><span class="zleg"><i style="background:var(--z4)"></i>Rebaixamento</span><span class="muted"><span id="legFx">Faixas pela posição atual</span> · clique num time para analisá-lo</span></div>
       <div class="tablewrap"><table id="tbl">
         <thead><tr><th class="l">#</th><th class="l">Time</th><th>P</th><th class="hide-sm">J</th><th class="hide-sm">V</th><th class="hide-sm" title="Saldo de gols dos jogos reais">SG</th><th class="hide-sm" title="Pontuação final média nas simulações">Proj.</th><th id="thMet">Queda</th><th id="thDelta" title="Diferença para o cenário sem palpites">Δ</th><th class="hide-sm form-h" title="Últimos 5 jogos, do mais antigo ao mais recente. Pontos vazados são palpites seus.">Últ. jogos</th></tr></thead>
         <tbody></tbody>
@@ -1769,6 +1769,7 @@ function formCell(t){
 }
 function renderTable(){
   $('#legPre').hidden = !VAGAS.p;
+  $('#legFx').textContent = garantOn() ? 'Faixas pela posição atual, já com as vagas garantidas' : 'Faixas pela posição atual';
   const D = MET[metric], P = D.prob(res), B = baseRes ? D.prob(baseRes) : null;
   const st = buildState(choice,null,scH,scA);
   const msZ = metric==='z4' ? E.mathStatus(st.shown, st.free) : null;
@@ -1776,8 +1777,15 @@ function renderTable(){
   const msT = kTop ? E.mathTop(st.shown, st.free, kTop) : null;
   const hasDelta = filled()>0 && B;
   $('#thDelta').hidden = !hasDelta;
-  const rows = [];
-  standings().forEach((s,k)=>{
+  const rows = [], STD = standings();
+  /* Com vagas já garantidas, as faixas seguem a redistribuição aplicada à tabela atual. */
+  let zc = null;
+  if (garantOn()){
+    const L = new Float64Array(NT), Dd = new Float64Array(NT), S = new Float64Array(NT);
+    E.allocSlots(Int32Array.from(STD.map(x=>x.i)), VAGAS.d, VAGAS.p, VAGAS.s, GARANT, L, Dd, S);
+    zc = t => Dd[t] ? 'zl' : L[t] ? 'zp' : S[t] ? 'zs' : '';
+  }
+  STD.forEach((s,k)=>{
     const p = P[s.i], t = TEAMS[s.i];
     let tag = '', pctCell = pctTxt(p);
     if (msZ && msZ[s.i]){ tag = '<span class="tag '+msZ[s.i]+'">'+(msZ[s.i]==='salvo'?'salvo':'caiu')+'</span>'; pctCell = msZ[s.i]==='salvo' ? '0%' : '100%'; }
@@ -1788,7 +1796,7 @@ function renderTable(){
     let dCell = '';
     if (hasDelta){ const d = p - B[s.i], better = D.good ? d>0.0005 : d<-0.0005, worse = D.good ? d<-0.0005 : d>0.0005;
       dCell = '<td class="delta '+(better?'down':worse?'up':'muted')+'">'+ppTxt(d)+'</td>'; }
-    rows.push('<tr data-i="'+s.i+'" class="'+zoneClass(k)+(k>=16?' inz4':'')+(s.i===focus?' focus':'')+(s.i===myTeam?' mine':'')+'">'+
+    rows.push('<tr data-i="'+s.i+'" class="'+(zc && k>0 && k<16 ? zc(s.i) : zoneClass(k))+(k>=16?' inz4':'')+(s.i===focus?' focus':'')+(s.i===myTeam?' mine':'')+'">'+
       '<td class="pos">'+(k+1)+'</td>'+
       '<td class="l"><div class="team">'+codeBox(t)+'<button type="button" class="tname team-focus" aria-label="Analisar '+t.n+'">'+t.n+'</button>'+mine+'</div></td>'+
       '<td><b>'+s.P+'</b></td><td class="hide-sm">'+s.J+'</td><td class="hide-sm">'+s.V+'</td><td class="hide-sm">'+(s.SG>0?'+':'')+s.SG+'</td>'+
@@ -2775,6 +2783,5 @@ if (!tourSeen() && !(sharedAtStart&&!sharedAtStart.invalid)){
 })();
 
 </script>
-
 <script data-goatcounter="https://henriquef16.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body></html>
