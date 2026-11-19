@@ -1383,7 +1383,15 @@ sup.ref a{font-family:var(--f-detail);font-size:.72em;text-decoration:none;color
   function wn(base, t) { return base.wins ? base.wins[t] : 0; }
   function surelyBelow(base, rem, u, t) { // u termina atrás de t mesmo vencendo tudo (t sem somar mais nada)
     var mu = base.pts[u] + 3 * rem[u];
-    return mu < base.pts[t] || (base.wins && mu === base.pts[t] && wn(base, u) + rem[u] < wn(base, t));
+    if (mu < base.pts[t]) return true;
+    if (!base.wins || mu > base.pts[t]) return false;
+    var wu = wn(base, u) + rem[u], wt = wn(base, t);
+    if (wu !== wt) return wu < wt;
+    /* Empate em pontos e vitórias: saldo e gols pró só são certos se nenhum dos dois joga mais
+       (com jogo pela frente, o placar pode mudar o saldo sem limite). */
+    if (rem[u] || rem[t] || !base.gd) return false;
+    if (base.gd[u] !== base.gd[t]) return base.gd[u] < base.gd[t];
+    return !!base.gf && base.gf[u] < base.gf[t];
   }
   function mathStatus(base, open) {
     var rem = new Int32Array(NT), t, u;
